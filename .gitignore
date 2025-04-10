@@ -1,0 +1,10 @@
+env/
+.env
+venv/
+.venv/
+
+
+.DS_Store
+
+models/
+data/
