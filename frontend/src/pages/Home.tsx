@@ -7,11 +7,11 @@ export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-white font-sans text-gray-800">
       <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center pb-24">
-        <h1 className="text-[40px] font-black text-[#433CFF] mb-3 tracking-wide">
+        <h1 className="text-[40px] font-black text-zipup-600 mb-3 tracking-wide">
           ZIPUP
         </h1>
 
-        <h2 className="text-xl font-bold text-[#433CFF] mb-1">
+        <h2 className="text-xl font-bold text-zipup-600 mb-1">
           &lt;삶권분석&gt; <br />
           리포트 설문지
         </h2>
@@ -28,7 +28,7 @@ export default function HomePage() {
 
         <button
             onClick={() => navigate("/survey")}
-            className="w-full max-w-xs bg-[#433CFF] text-white text-xl font-bold py-6 px-10 rounded-full shadow-lg hover:bg-[#2f2fcc] transition-all border-none mt-10"
+            className="w-full max-w-xs bg-blue-600 text-white text-xl font-bold py-6 px-10 rounded-full shadow-lg hover:bg-blue-700 transition-all border-none mt-10"
             >
             시작하기 →
         </button>
