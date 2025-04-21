@@ -49,9 +49,11 @@ function SurveyForm() {
         )}
 
         {/* 질문 유형별 렌더링 (버튼/셀렉트/입력 등) */}
-        <SurveyRenderer question={current} onAnswer={handleAnswer} />
+        <div key = {current.id} className="animate-fade-in duration-500">
+          <SurveyRenderer question={current} onAnswer={handleAnswer} />
       </div>
     </div>
+  </div>
   )
 }
 
