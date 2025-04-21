@@ -11,16 +11,10 @@ export default function SurveyRenderer({
 }) {
   // 선택 상태 저장 (radio, select, input에 따라 다르게 사용됨)
   const [selected, setSelected] = useState<string | number | null>(null)
-  const [sliderValues, setSliderValues] = useState<[number, number]>([
-    question.min || 0,
-    question.max || 100,
-  ])
 
   // 질문이 바뀔 때 selected 초기화
-  useEffect(() => {
-    setSelected(null)
-    setSliderValues([question.min || 0, question.max || 100])
-  }, [question.id])
+  useEffect(() => 
+    setSelected(null))
 
   // 공통 선택 처리 함수
   const handleSelect = (value: string | number) => {
@@ -121,7 +115,7 @@ export default function SurveyRenderer({
             }
           />
         )
-        
+
     default:
       return (
         <p className="text-sm text-red-500 mt-4">
