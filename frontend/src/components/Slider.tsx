@@ -28,6 +28,7 @@ export default function Slider({
       <div className="text-sm text-gray-700 text-center mb-2">
         {values[0]}평 ~ {values[1]}평
       </div>
+
       <Range
         step={step}
         min={min}
@@ -57,22 +58,29 @@ export default function Slider({
             {children}
           </div>
         )}
-        renderThumb={({
-          props,
-        }: {
-          props: React.HTMLAttributes<HTMLDivElement>
-        }) => (
-          <div
-            {...props}
-            style={{
-              height: "20px",
-              width: "20px",
-              backgroundColor: "#433CFF",
-              borderRadius: "50%",
-            }}
-          />
-        )}
+        renderThumb={({ props }: {
+          props: React.HTMLAttributes<HTMLDivElement> & {
+            key?: string | number
+            style: React.CSSProperties
+          }
+        }) => {
+          // key를 spread하면 경고 → 빼서 무시
+          const { key, ...rest } = props
+          return (
+            <div
+              {...rest}
+              style={{
+                ...props.style,
+                height: "20px",
+                width: "20px",
+                backgroundColor: "#433CFF",
+                borderRadius: "50%",
+              }}
+            />
+          )
+        }}
       />
+
       <div className="text-center mt-4">
         <button
           onClick={handleSelect}

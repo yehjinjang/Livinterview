@@ -347,7 +347,7 @@ export const questions: Question[] = [
     unit: "평",
     min: 0,
     max: 100,
-    rangeIds: [0, 100], 
+    rangeIds: ["minSize", "maxSize"], 
   },
   
 // -MARK: 공간 형태 
