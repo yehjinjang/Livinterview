@@ -9,30 +9,36 @@ function SurveyForm() {
   // 현재 질문 index (0부터 시작)
   const [index, setIndex] = useState(0)
 
-  // 사용자 응답 저장 객체 (key: 질문 id, value: 선택값)
+  // 사용자 응답 저장 객체 (key: 질문 id, value: 선택값 또는 복수 키)
   const [answers, setAnswers] = useState<Record<string, any>>({})
 
   // 현재 질문 데이터
   const current = questions[index]
-
   const navigate = useNavigate()
 
-  // 사용자가 답변을 선택했을 때 호출되는 함수
+  // 다음 질문 or 완료 처리
   const handleAnswer = (value: any) => {
-    // 유효하지 않은 값이면 넘어가지 않음
-    if (value === null || value === undefined || value === "") {
+    // 유효성 체크 (range는 객체, 일반은 string/number)
+    if (
+      value === null ||
+      value === undefined ||
+      (typeof value !== "object" && value === "")
+    ) {
       alert("답변을 선택해주세요!")
       return
     }
 
-    // 현재 질문 id에 대한 답변 저장
-    setAnswers((prev) => ({ ...prev, [current.id]: value }))
+    // range (객체) 타입은 ...spread 저장, 그 외는 key:value 저장
+    setAnswers((prev) =>
+      typeof value === "object"
+        ? { ...prev, ...value }
+        : { ...prev, [current.id]: value }
+    )
 
-    // 다음 질문으로 이동 or 설문 종료
+    // 다음 질문 or 완료 처리
     if (index < questions.length - 1) {
       setIndex((i) => i + 1)
     } else {
-      // 결과 페이지로 navigate
       navigate("/report", { state: { answers } })
     }
   }
@@ -60,7 +66,6 @@ function SurveyForm() {
             <BackButton onClick={handlePrev} />
           </div>
         )}
-
 
         {/* 진행 바 */}
         <div className="mt-6 mb-4">
