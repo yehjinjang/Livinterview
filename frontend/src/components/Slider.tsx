@@ -33,11 +33,17 @@ export default function Slider({
         min={min}
         max={max}
         values={values}
-        onChange={(vals) => {
+        onChange={(vals: number[]) => {
           setTouched(true)
           setValues(vals as [number, number])
         }}
-        renderTrack={({ props, children }) => (
+        renderTrack={({
+          props,
+          children,
+        }: {
+          props: React.HTMLAttributes<HTMLDivElement>
+          children: React.ReactNode
+        }) => (
           <div
             {...props}
             style={{
@@ -51,7 +57,11 @@ export default function Slider({
             {children}
           </div>
         )}
-        renderThumb={({ props }) => (
+        renderThumb={({
+          props,
+        }: {
+          props: React.HTMLAttributes<HTMLDivElement>
+        }) => (
           <div
             {...props}
             style={{
@@ -63,8 +73,6 @@ export default function Slider({
           />
         )}
       />
-    {/* 선택완료 버튼 목적: 최소, 최대 선택안할 시에는 넘어가지 않도록 선택완료  */}
-      {/* 선택 완료 버튼 */} 
       <div className="text-center mt-4">
         <button
           onClick={handleSelect}
