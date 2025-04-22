@@ -110,6 +110,8 @@ export default function SurveyRenderer({
 
         case "autocomplete":
           const [inputValue, setInputValue] = useState("")
+          const [selectedOption, setSelectedOption] = useState<string | null>(null)
+        
           const filteredOptions = question.options?.filter((opt) =>
             opt.toLowerCase().includes(inputValue.toLowerCase())
           )
@@ -119,7 +121,10 @@ export default function SurveyRenderer({
               <input
                 type="text"
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e) => {
+                  setInputValue(e.target.value)
+                  setSelectedOption(null) // 입력이 바뀌면 선택 초기화
+                }}
                 placeholder="지하철역 이름을 입력하세요"
                 className="w-full border border-gray-300 rounded p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
@@ -130,10 +135,16 @@ export default function SurveyRenderer({
                     <li
                       key={opt}
                       onClick={() => {
-                        setInputValue(opt)
-                        onAnswer(opt)
+                        if (selectedOption === opt) {
+                          onAnswer(opt) // 두 번 클릭 시 확정
+                        } else {
+                          setSelectedOption(opt)
+                          setInputValue(opt) // 선택된 항목 input에 채우기
+                        }
                       }}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      className={`px-4 py-2 cursor-pointer ${
+                        selectedOption === opt ? "bg-blue-100" : "hover:bg-gray-100"
+                      }`}
                     >
                       {opt}
                     </li>
