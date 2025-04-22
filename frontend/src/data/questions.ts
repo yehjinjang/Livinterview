@@ -1,4 +1,5 @@
 import { Question } from "../types/question";
+import { subwayStations } from "../data/stations";
 
 export const questions: Question[] = [
 // -MARK: 교통 
@@ -6,9 +7,9 @@ export const questions: Question[] = [
     id: "1",
     category: "교통",
     title: "가장 가까웠으면 하는 지하철역이 있으신가요?",
-    type: "select",
+    type: "autocomplete",
     icon: "/icons/report/transfer/subway.svg",
-    options: ["강남역", "홍대입구역", "서울역", "기타"]
+    options: subwayStations
   },
   {
     id: "1-subway",

@@ -106,8 +106,45 @@ export default function SurveyRenderer({
               </button>
             </div>
           </div>
-        )      
+        )
 
+        case "autocomplete":
+          const [inputValue, setInputValue] = useState("")
+          const filteredOptions = question.options?.filter((opt) =>
+            opt.toLowerCase().includes(inputValue.toLowerCase())
+          )
+        
+          return (
+            <div className="flex flex-col gap-2 text-left">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="지하철역 이름을 입력하세요"
+                className="w-full border border-gray-300 rounded p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+        
+              {inputValue.length > 0 && (
+                <ul className="border rounded shadow bg-white max-h-48 overflow-y-auto">
+                  {filteredOptions?.map((opt) => (
+                    <li
+                      key={opt}
+                      onClick={() => {
+                        setInputValue(opt)
+                        onAnswer(opt)
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      {opt}
+                    </li>
+                  ))}
+                  {filteredOptions?.length === 0 && (
+                    <li className="px-4 py-2 text-gray-400">일치하는 항목이 없습니다</li>
+                  )}
+                </ul>
+              )}
+            </div>
+          )
 
     default:
       return (
