@@ -1,6 +1,7 @@
 import { Room } from "../types/room"
+import { motion } from "framer-motion"
 
-export default function RoomDetail({
+export default function RoomDetailModal({
   room,
   onClose,
 }: {
@@ -8,7 +9,13 @@ export default function RoomDetail({
   onClose: () => void
 }) {
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-auto">
+    <motion.div
+      initial={{ y: "100%" }}
+      animate={{ y: 0 }}
+      exit={{ y: "100%" }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="fixed inset-0 z-50 bg-white flex flex-col overflow-auto rounded-t-3xl"
+    >
       {/* 상단 닫기 버튼 */}
       <div className="flex justify-end p-4">
         <button onClick={onClose} className="text-sm text-gray-500 hover:underline">
@@ -34,6 +41,6 @@ export default function RoomDetail({
         </p>
         <p className="text-sm text-gray-500">※ 본 정보는 예시.</p>
       </div>
-    </div>
+    </motion.div>
   )
 }
