@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom"
 import { questions } from "../data/questions"
 import SurveyRenderer from "../components/SurveyRenderer"
 import ProgressBar from "../components/ProgressBar"
-import BackButton from "../components/BackButton"
+import BackButton  from "../components/BackButton"
+import HomeButton from "../components/HomeButton"
 
 function SurveyForm() {
   // 현재 질문 index (0부터 시작)
@@ -60,12 +61,14 @@ function SurveyForm() {
     <div className="min-h-screen flex items-center justify-center bg-white text-center p-8">
       <div className="w-full max-w-md relative">
 
-        {/* 왼쪽 상단 이전 버튼 */}
-        {index > 0 && (
-          <div className="mb-4">
-            <BackButton onClick={handlePrev} />
-          </div>
-        )}
+      <div className="flex justify-between items-center mb-4">
+        {/* 왼쪽: 이전 버튼 */}
+        {index > 0 ? <BackButton onClick={handlePrev} /> : <div className="w-10" />}
+
+        {/* 오른쪽: 홈 버튼 */}
+        <HomeButton />
+      </div>
+
 
         {/* 진행 바 */}
         <div className="mt-6 mb-4">
