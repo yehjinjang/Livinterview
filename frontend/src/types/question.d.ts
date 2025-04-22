@@ -11,5 +11,5 @@ export interface Question {
   unit?: string
   multi?: boolean
   icon?: string
-  rangeIds?: [string, string]
+  rangeIds?: [string]
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Question } from "../types/question"
-import Slider from "../components/Slider"
+
 
 export default function SurveyRenderer({
   question,
@@ -69,52 +69,45 @@ export default function SurveyRenderer({
           placeholder={question.unit ? `숫자 입력 (${question.unit})` : "숫자 입력"}
         />
       )
+      case "range":
+          const [tempValue, setTempValue] = useState<number | null>(null)
 
-    case "range":
-      return (
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-700 w-24 text-left">최소 평수</label>
-            <input
-              type="number"
-              placeholder="예: 6"
-              className="flex-1 border p-2 rounded"
-              onChange={(e) =>
-                onAnswer({
-                  [question.rangeIds?.[0] ?? "min"]: Number(e.target.value),
-                })
-              }
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-700 w-24 text-left">최대 평수</label>
-            <input
-              type="number"
-              placeholder="예: 12"
-              className="flex-1 border p-2 rounded"
-              onChange={(e) =>
-                onAnswer({
-                  [question.rangeIds?.[1] ?? "max"]: Number(e.target.value),
-                })
-              }
-            />
-          </div>
-        </div>
-      )
-      case "slider":
-        return (
-          <Slider
-            min={question.min}
-            max={question.max}
-            defaultValues={[question.min ?? 6, question.max ?? 20]}
-            onChange={(vals) =>
-              onAnswer({
-                [question.rangeIds?.[0] ?? "min"]: vals[0],
-                [question.rangeIds?.[1] ?? "max"]: vals[1],
-              })
-            }
-          />
-        )
+          return (
+            <div className="flex flex-col gap-3">
+              {/* 입력 필드 + 입력 완료 버튼 */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  placeholder="예: 6"
+                  className="flex-1 border p-2 rounded"
+                  value={tempValue ?? ""}
+                  onChange={(e) => setTempValue(Number(e.target.value))}
+                />
+                <button
+                  onClick={() =>
+                    onAnswer({ [question.rangeIds?.[0] ?? "min"]: tempValue })
+                  }
+                  className="px-3 py-2 bg-zipup-600 text-white rounded-2xl hover:bg-blue-700 transition"
+                  disabled={tempValue === null}
+                >
+                  입력 완료
+                </button>
+              </div>
+
+              {/* 건너뛰기 버튼  */}
+              <div className="flex justify-end">
+                <button
+                  onClick={() =>
+                    onAnswer({ [question.rangeIds?.[0] ?? "min"]: null })
+                  }
+                  className="text-sm text-gray-500 hover:underline"
+                >
+                  건너뛰기
+                </button>
+              </div>
+            </div>
+          )
+
 
     default:
       return (
