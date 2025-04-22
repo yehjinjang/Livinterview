@@ -1,5 +1,6 @@
 import { Room } from "../types/room"
 import { motion } from "framer-motion"
+import { useNavigate } from "react-router-dom"
 
 export default function RoomDetailModal({
   room,
@@ -8,6 +9,8 @@ export default function RoomDetailModal({
   room: Room
   onClose: () => void
 }) {
+  const navigate = useNavigate()
+
   return (
     <motion.div
       initial={{ y: "100%" }}
@@ -40,6 +43,14 @@ export default function RoomDetailModal({
           💰 {room.price}만원 / {room.size}평
         </p>
         <p className="text-sm text-gray-500">※ 본 정보는 예시.</p>
+
+        {/* AI 인테리어 연결 */}
+        <button
+          onClick={() => navigate("/interior")}
+          className="w-full mt-4 bg-zipup-600 text-white text-sm py-3 rounded-xl hover:bg-blue-700 transition"
+        >
+          AI인테리어 도우미 연결
+        </button>
       </div>
     </motion.div>
   )
