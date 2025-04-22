@@ -46,7 +46,13 @@ export default function RoomDetailModal({
 
         {/* AI 인테리어 연결 */}
         <button
-          onClick={() => navigate("/interior")}
+          onClick={() => navigate("/interior",{
+            state: {
+              // 인테리어 챗봇으로 넘어갈때 넘겨줄 이미지 선언
+              imageUrl: room.imageUrl, 
+              title: room.title,
+          }
+        })}
           className="w-full mt-4 bg-zipup-600 text-white text-sm py-3 rounded-xl hover:bg-blue-700 transition"
         >
           AI인테리어 도우미 연결

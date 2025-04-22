@@ -1,7 +1,7 @@
 import { useState } from "react"
 import MapView from "../components/MapView"
 import RoomInfo from "../components/RoomInfo"
-import RoomDetail from "../components/RoomieDetail"
+import RoomDetail from "../pages/RoomieDetail"
 import BottomTabBar from "../components/BottomTabBar"
 import { Room } from "../types/room"
 
