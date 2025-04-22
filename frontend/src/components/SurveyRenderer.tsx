@@ -70,43 +70,43 @@ export default function SurveyRenderer({
         />
       )
       case "range":
-          const [tempValue, setTempValue] = useState<number | null>(null)
-
-          return (
-            <div className="flex flex-col gap-3">
-              {/* 입력 필드 + 입력 완료 버튼 */}
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  placeholder="예: 6"
-                  className="flex-1 border p-2 rounded"
-                  value={tempValue ?? ""}
-                  onChange={(e) => setTempValue(Number(e.target.value))}
-                />
-                <button
-                  onClick={() =>
-                    onAnswer({ [question.rangeIds?.[0] ?? "min"]: tempValue })
-                  }
-                  className="ml-2 px-3 py-2 bg-zipup-600 text-white rounded-2xl hover:bg-blue-700 transition"
-                  disabled={tempValue === null}
-                >
-                  입력 완료
-                </button>
-              </div>
-
-              {/* 건너뛰기 버튼  */}
-              <div className="flex justify-end">
-                <button
-                  onClick={() =>
-                    onAnswer({ [question.rangeIds?.[0] ?? "min"]: null })
-                  }
-                  className="text-sm text-gray-500 hover:underline"
-                >
-                  건너뛰기
-                </button>
-              </div>
+        const [tempValue, setTempValue] = useState<number | null>(null)
+      
+        return (
+          <div className="flex flex-col gap-3">
+            {/* 입력과 버튼을 전체적으로 왼쪽, 위로  */}
+            <div className="flex items-center gap-2 ml-3 mt-">
+              <input
+                type="number"
+                placeholder="예: 6"
+                className="flex-1 border p-2 rounded"
+                value={tempValue ?? ""}
+                onChange={(e) => setTempValue(Number(e.target.value))}
+              />
+              <button
+                onClick={() =>
+                  onAnswer({ [question.rangeIds?.[0] ?? "min"]: tempValue })
+                }
+                className="ml-1 px-3 py-2 bg-zipup-600 text-white rounded-2xl hover:bg-blue-700 transition"
+                disabled={tempValue === null}
+              >
+                입력 완료
+              </button>
             </div>
-          )
+      
+            {/* 건너뛰기 버튼 */}
+            <div className="flex justify-end mr-2">
+              <button
+                onClick={() =>
+                  onAnswer({ [question.rangeIds?.[0] ?? "min"]: null })
+                }
+                className="text-sm text-gray-500 hover:underline"
+              >
+                건너뛰기
+              </button>
+            </div>
+          </div>
+        )      
 
 
     default:

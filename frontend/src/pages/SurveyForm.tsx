@@ -62,7 +62,7 @@ function SurveyForm() {
       <div className="w-full max-w-md relative">
 
 
-            {/* 홈 버튼*/}
+    {/* 홈 버튼*/}
     <div className="flex justify-end items-center mb-2">
       <HomeButton />
     </div>
