@@ -6,5 +6,6 @@ export interface Room {
     lng: number
     price: number
     size: number
+    imageUrl?: string
   }
   
