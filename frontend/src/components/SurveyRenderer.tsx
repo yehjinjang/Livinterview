@@ -87,7 +87,7 @@ export default function SurveyRenderer({
                   onClick={() =>
                     onAnswer({ [question.rangeIds?.[0] ?? "min"]: tempValue })
                   }
-                  className="px-3 py-2 bg-zipup-600 text-white rounded-2xl hover:bg-blue-700 transition"
+                  className="ml-2 px-3 py-2 bg-zipup-600 text-white rounded-2xl hover:bg-blue-700 transition"
                   disabled={tempValue === null}
                 >
                   입력 완료
