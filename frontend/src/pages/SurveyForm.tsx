@@ -61,19 +61,23 @@ function SurveyForm() {
     <div className="min-h-screen flex items-center justify-center bg-white text-center p-8">
       <div className="w-full max-w-md relative">
 
-      <div className="flex justify-between items-center mb-4">
-        {/* 왼쪽: 이전 버튼 */}
-        {index > 0 ? <BackButton onClick={handlePrev} /> : <div className="w-10" />}
 
-        {/* 오른쪽: 홈 버튼 */}
-        <HomeButton />
+            {/* 홈 버튼*/}
+    <div className="flex justify-end items-center mb-2">
+      <HomeButton />
+    </div>
+
+    {/*  BackButton + ProgressBar */}
+    <div className="flex items-center gap-2 mb-4">
+      {index > 0 ? (
+        <BackButton onClick={handlePrev} className = "-mt-3"/>
+      ) : (
+        <div className="w-10" /> // 자리 유지
+      )}
+      <div className="flex-1">
+        <ProgressBar current={index + 1} total={questions.length} />
       </div>
-
-
-        {/* 진행 바 */}
-        <div className="mt-6 mb-4">
-          <ProgressBar current={index + 1} total={questions.length} />
-        </div>
+    </div>
 
         {/* 질문 텍스트 */}
         <h2 className="text-xl font-bold text-gray-800 mb-4">
