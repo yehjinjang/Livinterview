@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Question } from "../types/question"
+import Slider from "../components/Slider"
 
 export default function SurveyRenderer({
   question,
@@ -12,9 +13,8 @@ export default function SurveyRenderer({
   const [selected, setSelected] = useState<string | number | null>(null)
 
   // 질문이 바뀔 때 selected 초기화
-  useEffect(() => {
-    setSelected(null)
-  }, [question.id])
+  useEffect(() => 
+    setSelected(null))
 
   // 공통 선택 처리 함수
   const handleSelect = (value: string | number) => {
@@ -31,12 +31,11 @@ export default function SurveyRenderer({
             <button
               key={opt}
               onClick={() => handleSelect(opt)}
-              className={`w-full py-4 rounded-xl font-semibold transition
-                ${
-                  selected === opt
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+              className={`w-full py-4 rounded-xl font-semibold transition ${
+                selected === opt
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
             >
               {opt}
             </button>
@@ -70,6 +69,52 @@ export default function SurveyRenderer({
           placeholder={question.unit ? `숫자 입력 (${question.unit})` : "숫자 입력"}
         />
       )
+
+    case "range":
+      return (
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-700 w-24 text-left">최소 평수</label>
+            <input
+              type="number"
+              placeholder="예: 6"
+              className="flex-1 border p-2 rounded"
+              onChange={(e) =>
+                onAnswer({
+                  [question.rangeIds?.[0] ?? "min"]: Number(e.target.value),
+                })
+              }
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-700 w-24 text-left">최대 평수</label>
+            <input
+              type="number"
+              placeholder="예: 12"
+              className="flex-1 border p-2 rounded"
+              onChange={(e) =>
+                onAnswer({
+                  [question.rangeIds?.[1] ?? "max"]: Number(e.target.value),
+                })
+              }
+            />
+          </div>
+        </div>
+      )
+      case "slider":
+        return (
+          <Slider
+            min={question.min}
+            max={question.max}
+            defaultValues={[question.min ?? 6, question.max ?? 20]}
+            onChange={(vals) =>
+              onAnswer({
+                [question.rangeIds?.[0] ?? "min"]: vals[0],
+                [question.rangeIds?.[1] ?? "max"]: vals[1],
+              })
+            }
+          />
+        )
 
     default:
       return (

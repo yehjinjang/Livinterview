@@ -1,4 +1,4 @@
-export type QuestionType = "radio" | "select" | "slider" | "input" | "checkbox"
+export type QuestionType = "radio" | "select" | "slider" | "input" | "checkbox" | "range"
 
 export interface Question {
   id: string
@@ -11,4 +11,5 @@ export interface Question {
   unit?: string
   multi?: boolean
   icon?: string
+  rangeIds?: [string, string]
 }
