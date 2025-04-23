@@ -28,6 +28,7 @@ class StateEnum(enum.Enum):
 class TypeEnum(enum.Enum):
     select = "select"
     radio = "radio"
+    text = "text"
 
 
 class User(Base):
@@ -72,7 +73,7 @@ class HomieQuestion(Base):
     sub_category = Column(String(10), nullable=False)
     title = Column(String(50), nullable=False)
     input_type = Column(Enum(TypeEnum), nullable=False)
-    icon = Column(String(100))
+    icon_path = Column(String(100))
     state = Column(Enum(StateEnum), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     modified_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
