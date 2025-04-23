@@ -22,7 +22,7 @@ export default function FilterCard({ onFilterChange }: FilterCardProps) {
               key={type}
               onClick={() => setContractType(type as "월세" | "전세")}
               className={`px-3 py-1 rounded-full border text-sm transition ${
-                contractType === type ? "bg-blue-600 text-white" : "bg-white"
+                contractType === type ? "bg-zipup-600 text-white" : "bg-white"
               }`}
             >
               {type}
@@ -94,7 +94,7 @@ export default function FilterCard({ onFilterChange }: FilterCardProps) {
               sizeOption,
             })
           }
-          className="text-sm px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+          className="text-sm px-4 py-2 rounded-lg bg-zipup-600 text-white hover:bg-blue-700 transition"
         >
           적용
         </button>

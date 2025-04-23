@@ -20,12 +20,17 @@ export default function RangeSlider({
   onChange,
 }: Props) {
   return (
-    <div>
-      <p className="text-sm font-semibold mb-1">{label}</p>
-      <div className="flex items-center justify-between text-xs mb-1">
-        <span>{value[0]}{unit}</span>
-        <span>{value[1]}{unit}</span>
+    <div className="space-y-2">
+      {/* 라벨 및 값 범위 */}
+      <div>
+        <p className="text-sm font-semibold">{label}</p>
+        <div className="flex justify-between text-xs text-gray-600 mt-1">
+          <span>{value[0]}{unit}</span>
+          <span>{value[1]}{unit}</span>
+        </div>
       </div>
+
+      {/* 슬라이더 */}
       <Range
         values={value}
         step={step}
@@ -36,11 +41,12 @@ export default function RangeSlider({
           <div
             {...props}
             style={{
+              ...props.style,
               height: "6px",
               width: "100%",
               background: getTrackBackground({
                 values: value,
-                colors: ["#ccc", "#3b82f6", "#ccc"],
+                colors: ["#ccc", "#433CFF", "#ccc"],
                 min,
                 max,
               }),
@@ -51,20 +57,24 @@ export default function RangeSlider({
             {children}
           </div>
         )}
-        renderThumb={({ props }) => (
+        renderThumb={({ props, index }) => (
           <div
             {...props}
             style={{
+              ...props.style,
               height: "20px",
               width: "20px",
-              borderRadius: "10px",
-              backgroundColor: "#3b82f6",
+              borderRadius: "50%",
+              backgroundColor: "#433CFF",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              transform: "translateY(-2px)", 
               boxShadow: "0 0 0 1px white",
             }}
-          />
+          >
+            <span className="sr-only">{index === 0 ? "최소" : "최대"}</span>
+          </div>
         )}
       />
     </div>
