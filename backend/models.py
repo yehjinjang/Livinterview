@@ -6,9 +6,10 @@ from sqlalchemy import (
     ForeignKey,
     TIMESTAMP,
     SmallInteger,
+    DATE,
 )
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, expression
 import enum
 
 Base = declarative_base()
@@ -28,6 +29,7 @@ class StateEnum(enum.Enum):
 class TypeEnum(enum.Enum):
     select = "select"
     radio = "radio"
+    text = "text"
 
 
 class User(Base):
@@ -37,12 +39,12 @@ class User(Base):
     name = Column(String(50), nullable=False)
     email = Column(String(100), nullable=False)
     phone = Column(String(11))
-    age = Column(SmallInteger)
+    birth = Column(DATE)
     gender = Column(Enum(GenderEnum), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     modified_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
-    expired_at = Column(TIMESTAMP)
-    state = Column(Enum(StateEnum), nullable=False)
+    expired_at = Column(TIMESTAMP, nullable=True)
+    state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
     homie_histories = relationship("HomieHistory", back_populates="user")
 
     def __repr__(self):
@@ -70,12 +72,12 @@ class HomieQuestion(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     main_category = Column(String(10), nullable=False)
     sub_category = Column(String(10), nullable=False)
-    title = Column(String(50), nullable=False)
-    type = Column(Enum(TypeEnum), nullable=False)
-    icon = Column(String(100))
-    state = Column(Enum(StateEnum), nullable=False)
+    content = Column(String(50), nullable=False)
+    input_type = Column(Enum(TypeEnum), nullable=False)
+    icon_path = Column(String(100))
+    state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
     created_at = Column(TIMESTAMP, server_default=func.now())
-    modified_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    expired_at = Column(TIMESTAMP, nullable=True)
     homie_answers = relationship("HomieAnswer", back_populates="homie_question")
 
     def __repr__(self):
@@ -106,10 +108,10 @@ class HomieAnswer(Base):
     )
     content = Column(String(50), nullable=False)
     score = Column(SmallInteger, nullable=False)
-    state = Column(Enum(StateEnum), nullable=False)
+    state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
     created_at = Column(TIMESTAMP, server_default=func.now())
-    modified_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
-    homie_question = relationship("HomieAnswer", back_populates="homie_answers")
+    expired_at = Column(TIMESTAMP, nullable=True)
+    homie_question = relationship("HomieQuestion", back_populates="homie_answers")
 
     def __repr__(self):
         cols = []
@@ -136,7 +138,7 @@ class HomieHistory(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     users_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    user_id = relationship("User", back_populates="homie_histories")
+    user = relationship("User", back_populates="homie_histories")
     homie_qna_histories = relationship(
         "HomieQnAHistory", back_populates="homie_history"
     )
