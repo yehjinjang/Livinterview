@@ -350,14 +350,6 @@ export const questions: Question[] = [
   },
   
 // -MARK: 공간 형태 
-{
-    id: "residence_type",
-    category: "주거",
-    title: "어떤 주거 유형을 찾고 계세요?",
-    type: "radio",
-    options: ["원룸", "투룸", "쓰리룸 이상", "빌라", "오피스텔"],
-    multi: true,
-},
 
 {
     id: "contract_type",
