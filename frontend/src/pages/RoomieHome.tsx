@@ -3,6 +3,7 @@ import MapView from "../components/MapView"
 import RoomInfo from "../components/RoomInfo"
 import RoomDetail from "./RoomieDetail"
 import BottomTabBar from "../components/BottomTabBar"
+import FilterCard from "../components/FilterCard"
 import { Room } from "../types/room"
 
 export default function RoomieHome() {
@@ -10,7 +11,9 @@ export default function RoomieHome() {
   const [showDetail, setShowDetail] = useState(false)
 
   return (
-    <div className="flex flex-col w-full h-screen">
+    <div className="flex flex-col w-full h-screen relative">
+      <FilterCard onFilterChange={(filters) => console.log("필터 변경됨", filters)} />
+
       {/* 지도 영역  */}
       <div className="flex-1">
         <MapView
