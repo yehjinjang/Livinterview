@@ -43,7 +43,7 @@ class User(Base):
     gender = Column(Enum(GenderEnum), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     modified_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
-    expired_at = Column(TIMESTAMP)
+    expired_at = Column(TIMESTAMP, nullable=True)
     state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
     homie_histories = relationship("HomieHistory", back_populates="user")
 
@@ -77,7 +77,7 @@ class HomieQuestion(Base):
     icon_path = Column(String(100))
     state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
     created_at = Column(TIMESTAMP, server_default=func.now())
-    expired_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    expired_at = Column(TIMESTAMP, nullable=True)
     homie_answers = relationship("HomieAnswer", back_populates="homie_question")
 
     def __repr__(self):
@@ -110,8 +110,8 @@ class HomieAnswer(Base):
     score = Column(SmallInteger, nullable=False)
     state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
     created_at = Column(TIMESTAMP, server_default=func.now())
-    expired_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
-    homie_question = relationship("HomieAnswer", back_populates="homie_answers")
+    expired_at = Column(TIMESTAMP, nullable=True)
+    homie_question = relationship("HomieQuestion", back_populates="homie_answers")
 
     def __repr__(self):
         cols = []
