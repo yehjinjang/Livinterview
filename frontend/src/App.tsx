@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage"
 import SurveyForm from "./pages/SurveyForm";
 import Report from "./pages/Report"
 import RoomieHome from "./pages/RoomieHome"
+import ProfilePage from "./pages/ProfilePage"
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/survey" element={<SurveyForm />} />
         <Route path="/report" element={<Report />} />
         <Route path="/roomie" element={<RoomieHome />} /> 
+        <Route path="/profile" element={<ProfilePage />} /> 
       </Routes>
     </BrowserRouter>
   );
