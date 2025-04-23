@@ -75,7 +75,7 @@ export default function SurveyRenderer({
       
         return (
           <div className="flex flex-col gap-3">
-            <div className="flex pl-2 items-center gap-2 ml-3">
+            <div className="flex pl-2 items-center gap-3 ml-3">
               <input
                 type="text"
                 placeholder="예: 6 (숫자만 입력 가능해요)"
@@ -141,30 +141,27 @@ export default function SurveyRenderer({
           )
         
           return (
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-3 text-left">
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => {
                   setInputValue(e.target.value)
-                  setSelectedOption(null) // 입력이 바뀌면 선택 초기화
+                  setSelectedOption(null)
                 }}
                 placeholder="지하철역 이름을 입력하세요"
                 className="w-full border border-gray-300 rounded p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                autoFocus
               />
         
-              {inputValue.length > 0 && (
+              {!selectedOption && inputValue.length > 0 && (
                 <ul className="border rounded shadow bg-white max-h-48 overflow-y-auto">
                   {filteredOptions?.map((opt) => (
                     <li
                       key={opt}
                       onClick={() => {
-                        if (selectedOption === opt) {
-                          onAnswer(opt) // 두 번 클릭 시 확정
-                        } else {
-                          setSelectedOption(opt)
-                          setInputValue(opt) // 선택된 항목 input에 채우기
-                        }
+                        setSelectedOption(opt)
+                        setInputValue(opt) // input에 선택된 값 표시
                       }}
                       className={`px-4 py-2 cursor-pointer ${
                         selectedOption === opt ? "bg-blue-100" : "hover:bg-gray-100"
@@ -178,8 +175,24 @@ export default function SurveyRenderer({
                   )}
                 </ul>
               )}
+        
+              <button
+                onClick={() => {
+                  if (selectedOption) {
+                    onAnswer(selectedOption)
+                  }
+                }}
+                disabled={!selectedOption}
+                className={`mt-2 px-4 py-2 rounded-2xl text-white transition ${
+                  selectedOption
+                    ? "bg-zipup-600 hover:bg-blue-700"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
+              >
+                선택 완료
+              </button>
             </div>
-          )
+          )             
 
     default:
       return (
