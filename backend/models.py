@@ -138,7 +138,7 @@ class HomieHistory(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     users_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    user_id = relationship("User", back_populates="homie_histories")
+    user = relationship("User", back_populates="homie_histories")
     homie_qna_histories = relationship(
         "HomieQnAHistory", back_populates="homie_history"
     )
