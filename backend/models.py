@@ -71,7 +71,7 @@ class HomieQuestion(Base):
     main_category = Column(String(10), nullable=False)
     sub_category = Column(String(10), nullable=False)
     title = Column(String(50), nullable=False)
-    type = Column(Enum(TypeEnum), nullable=False)
+    input_type = Column(Enum(TypeEnum), nullable=False)
     icon = Column(String(100))
     state = Column(Enum(StateEnum), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
