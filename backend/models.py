@@ -6,6 +6,7 @@ from sqlalchemy import (
     ForeignKey,
     TIMESTAMP,
     SmallInteger,
+    DATE,
 )
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func
@@ -38,7 +39,7 @@ class User(Base):
     name = Column(String(50), nullable=False)
     email = Column(String(100), nullable=False)
     phone = Column(String(11))
-    age = Column(SmallInteger)
+    birth = Column(DATE)
     gender = Column(Enum(GenderEnum), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     modified_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
@@ -76,7 +77,7 @@ class HomieQuestion(Base):
     icon_path = Column(String(100))
     state = Column(Enum(StateEnum), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    modified_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    expired_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     homie_answers = relationship("HomieAnswer", back_populates="homie_question")
 
     def __repr__(self):
@@ -109,7 +110,7 @@ class HomieAnswer(Base):
     score = Column(SmallInteger, nullable=False)
     state = Column(Enum(StateEnum), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    modified_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    expired_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     homie_question = relationship("HomieAnswer", back_populates="homie_answers")
 
     def __repr__(self):
