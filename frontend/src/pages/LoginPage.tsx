@@ -15,11 +15,16 @@ export default function LoginPage() {
     window.location.href = `${backend}/auth/${provider}`
   }
 
+  const handleGuestAccess = () => {
+    sessionStorage.removeItem("user") // 혹시라도 기존 로그인 흔적 제거
+    navigate("/roomie")
+  }
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50 px-4">
       <h1 className="text-3xl font-black text-zipup-600 mb-8">ZIPUP</h1>
-      <p className="text-gray text-sm mb-10 text-center">
-        아래 소셜 계정으로 간편하게 시작해보세요
+      <p className="text-gray-600 text-sm mb-10 text-center">
+        아래 소셜 계정으로 간편하게 시작해보세요!
       </p>
 
       <div className="space-y-4 w-full max-w-xs">
@@ -47,6 +52,14 @@ export default function LoginPage() {
           네이버로 시작하기
         </button>
       </div>
+
+      {/* 비회원 접근 */}
+      <button
+        onClick={handleGuestAccess}
+        className="mt-6 text-xs text-gray-400 hover:underline transition"
+      >
+        비회원으로 둘러보기
+      </button>
     </div>
   )
 }
