@@ -7,7 +7,7 @@ venv/
 .DS_Store
 
 models/
-data/
+# data/
 node_modules/
 dist/
 *.tsbuildinfo
