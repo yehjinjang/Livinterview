@@ -71,7 +71,7 @@ class HomieQuestion(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     main_category = Column(String(10), nullable=False)
     sub_category = Column(String(10), nullable=False)
-    title = Column(String(50), nullable=False)
+    content = Column(String(50), nullable=False)
     input_type = Column(Enum(TypeEnum), nullable=False)
     icon_path = Column(String(100))
     state = Column(Enum(StateEnum), nullable=False)
