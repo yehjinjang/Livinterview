@@ -22,7 +22,15 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50 px-4">
-      <h1 className="text-3xl font-black text-zipup-600 mb-8">ZIPUP</h1>
+            <div className="flex items-center gap-2 mb-8 animate-bounceLogo">
+            <img
+                src="/icons/main.png"
+                alt="ZIPUP 로고"
+                className="w-[50px] h-[50px]"
+            />
+            <span className="text-3xl font-black text-zipup-600">ZIPUP</span>
+            </div>
+
       <p className="text-gray-600 text-sm mb-10 text-center">
         아래 소셜 계정으로 간편하게 집업과의 여정을 떠나보세요!
       </p>
