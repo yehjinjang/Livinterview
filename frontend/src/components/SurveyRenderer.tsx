@@ -71,30 +71,54 @@ export default function SurveyRenderer({
       )
       case "range":
         const [tempValue, setTempValue] = useState<number | null>(null)
+        const [isInvalid, setIsInvalid] = useState(false)
       
         return (
           <div className="flex flex-col gap-3">
-            {/* 입력과 버튼을 전체적으로 왼쪽, 위로  */}
-            <div className="flex items-center gap-2 ml-3 mt-">
+            <div className="flex pl-2 items-center gap-2 ml-3">
               <input
-                type="number"
-                placeholder="예: 6"
-                className="flex-1 border p-2 rounded"
+                type="text"
+                placeholder="예: 6 (숫자만 입력 가능해요)"
+                className={`flex-1 border p-2 p1-5 rounded transition-all duration-300 ${
+                  isInvalid ? "border-red-500 animate-shake" : "border-gray-300"
+                }`}
                 value={tempValue ?? ""}
-                onChange={(e) => setTempValue(Number(e.target.value))}
+                onChange={(e) => {
+                  const value = e.target.value
+      
+                  if (value === "") {
+                    setTempValue(null)
+                    setIsInvalid(false)
+                    return
+                  }
+      
+                  if (!/^\d+$/.test(value)) {
+                    setIsInvalid(true)
+                    setTimeout(() => setIsInvalid(false), 300) // 애니메이션 초기화
+                    return
+                  }
+      
+                  setTempValue(Number(value))
+                  setIsInvalid(false)
+                }}
               />
+      
               <button
-                onClick={() =>
+                onClick={() => {
+                  if (tempValue === null || isNaN(tempValue)) {
+                    setIsInvalid(true)
+                    setTimeout(() => setIsInvalid(false), 300)
+                    return
+                  }
+      
                   onAnswer({ [question.rangeIds?.[0] ?? "min"]: tempValue })
-                }
+                }}
                 className="ml-1 px-3 py-2 bg-zipup-600 text-white rounded-2xl hover:bg-blue-700 transition"
-                disabled={tempValue === null}
               >
                 입력 완료
               </button>
             </div>
       
-            {/* 건너뛰기 버튼 */}
             <div className="flex justify-end mr-2">
               <button
                 onClick={() =>
@@ -106,7 +130,7 @@ export default function SurveyRenderer({
               </button>
             </div>
           </div>
-        )
+        )              
 
         case "autocomplete":
           const [inputValue, setInputValue] = useState("")
