@@ -57,25 +57,29 @@ export default function RangeSlider({
             {children}
           </div>
         )}
-        renderThumb={({ props, index }) => (
-          <div
-            {...props}
-            style={{
-              ...props.style,
-              height: "20px",
-              width: "20px",
-              borderRadius: "50%",
-              backgroundColor: "#433CFF",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              transform: "translateY(-2px)", 
-              boxShadow: "0 0 0 1px white",
-            }}
-          >
-            <span className="sr-only">{index === 0 ? "최소" : "최대"}</span>
-          </div>
-        )}
+        renderThumb={({ props, index }) => {
+          const { key, ...rest } = props
+          return (
+            <div
+              key={key}
+              {...rest}
+              style={{
+                ...rest.style,
+                height: "20px",
+                width: "20px",
+                borderRadius: "50%",
+                backgroundColor: "#433CFF",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                transform: "translateY(-2px)",
+                boxShadow: "0 0 0 1px white",
+              }}
+            >
+              <span className="sr-only">{index === 0 ? "최소" : "최대"}</span>
+            </div>
+          )
+        }}
       />
     </div>
   )
