@@ -13,3 +13,4 @@ dist/
 *.tsbuildinfo
 node_modules/.tmp/
 .DS_Store
+__pycache__/

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import LoginPage from "./pages/LoginPage"
 import SurveyForm from "./pages/SurveyForm";
 import Report from "./pages/Report"
 import RoomieHome from "./pages/RoomieHome"
@@ -10,6 +11,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/survey" element={<SurveyForm />} />
         <Route path="/report" element={<Report />} />
         <Route path="/roomie" element={<RoomieHome />} /> 
