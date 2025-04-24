@@ -2,6 +2,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from core.config import NAVER_CLIENT_ID, NAVER_CLIENT_SECRET
 import httpx, logging
+import os
+os.environ.pop("SSL_CERT_FILE", None)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
