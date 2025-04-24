@@ -1,4 +1,5 @@
 import { Question } from "../types/question";
+import { subwayStations } from "../data/stations";
 
 export const questions: Question[] = [
   // -MARK: 교통
@@ -6,9 +7,10 @@ export const questions: Question[] = [
     id: "tranfer_freq",
     category: "교통",
     title: "가장 가까웠으면 하는 지하철역이 있으신가요?",
-    type: "select",
+    type: "autocomplete",
     icon: "/icons/report/transfer/subway.svg",
-    options: ["강남역", "홍대입구역", "서울역", "기타"],
+    options: subwayStations
+
   },
   {
     id: "1-subway",
@@ -398,15 +400,17 @@ export const questions: Question[] = [
     id: "area_range",
     category: "주거",
     title: "찾으시는 오피스텔의 최소/최대 평수를 입력해주세요.",
-    type: "input",
+    type: "range",
     unit: "평",
     min: 0,
     max: 100,
-    rangeIds: ["minSize", "maxSize"],
-  },
+    rangeIds: ["minSize"],
 
-  // -MARK: 공간 형태
-  {
+  },
+  
+// -MARK: 공간 형태 
+
+{
     id: "contract_type",
     category: "주거",
     title: "계약 형태는 어떤 걸 선호하시나요?",
