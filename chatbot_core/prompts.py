@@ -1,20 +1,6 @@
 
 from langchain.prompts import PromptTemplate
 
-refine_reply_prompt = PromptTemplate.from_template("""
-아래는 인테리어 챗봇이 사용자 질문에 답한 초안이야.
-전체적으로 괜찮긴 하지만, 아래 세 가지를 더해서 자연스럽고 이해하기 쉽게 고쳐줘:
-
-1. 사용자가 요청한 내용을 맨 앞에 자연스럽게 요약해줘
-2. 배치나 스타일 이유는 방 분위기랑 연결해서 설명해줘
-3. 톤이나 스타일 키워드를 강조해서 끝에 정리해줘
-
-초기 응답:
-{response}
-
-출력 형식:
-사용자 요청 요약 + 배치 제안 + 스타일 요약 (친근하고 자연스러운 반말)
-""")
 
 question_check_prompt = PromptTemplate.from_template("""
 다음 문장이 질문인지 판단해줘. 질문이면 "YES", 아니면 "NO"라고만 답해.
@@ -24,11 +10,11 @@ question_check_prompt = PromptTemplate.from_template("""
 """)
 
 check_agreement_prompt = PromptTemplate.from_template("""
-다음 사용자의 말이 GPT 제안에 '좋아', '그렇게 해줘', '응' 같은 명확한 동의 표현인지 판단해줘.
+다음 사용자의 말이 GPT 제안에 '좋아', '그렇게 해줘', "네", '응' 같은 명확한 동의 표현인지 판단해줘.
 
 조건:
-- "좋아", "그래", "응", "좋은 생각이야", "그렇게 해줘" 같은 말이면 "YES"라고 답해
-- 그냥 가구 이름이나 키워드만 말한 건 "NO"로 해줘
+- "좋아", "그래", "응", "좋은 생각이야", "네", "그렇게 해줘" 같은 말이면 "YES"라고 답해
+- 그냥 가구 이름이나 키워드만 말하거나 "아니오" 같은 말이면 "NO"로 해줘
 
 사용자 응답:
 {text}
@@ -67,10 +53,25 @@ check_prompt = PromptTemplate.from_template("""
 """)
 
 
+furniture_warning_prompt = PromptTemplate.from_template("""
+현재까지의 대화 내용을 기반으로, 인테리어에 제안된 가구가 너무 많을 수 있어.
+이미지 생성 시 현실적이지 않을 수 있다는 점을 사용자에게 자연스럽게 알려줘.
+
+조건:
+- 너무 많은 가구가 포함되면 현실성이 떨어질 수 있음을 부드럽게 경고
+- 사용자가 "그만 추가하고 이대로 이미지 만들기"를 선택할지, 아니면 이미지가 이상해져도 계속 추가할 건지 물어보기
+- 반말, 자연스러운 톤, 부담 없는 질문으로 마무리
+
+대화 내용:
+{conversation}
+""")
+
+
+
 followup_question_prompt = PromptTemplate.from_template("""
 다음 대화 내용은 인테리어 프롬프트를 만들기엔 정보가 부족해.
 부족한 이유를 반영해서, 자연스럽게 이어갈 수 있는 구체적인 질문을 1개 반말로 만들어줘.
-예: 스타일, 가구 색상/위치, 추가 장식 요소 등을 물어보는 질문이 좋아.
+예: 스타일, 필요한 가구, 가구 색상/위치, 추가 장식 요소 등을 물어보는 질문이 좋아.
 
 대화 내용:
 {conversation}
@@ -91,6 +92,18 @@ summary_prompt = PromptTemplate.from_template("""
 
 대화 내용:
 {conversation}
+""")
+
+check_completion_prompt = PromptTemplate.from_template("""
+다음 사용자 입력이 인테리어에 대한 추가 질문이나 요청 없이,
+"이제 됐어요", "충분해요", "더 필요한 건 없어요", "아니요", "아니" 등 대화를 마무리하려는 의사 표현인지 판단해줘.
+
+조건:
+- 사용자 입력이 마무리 의도("이제 됐어", "그 정도면 됐어", "더 필요한 거 없어", "이대로 좋아요", "딱 좋아요", "아니", "아니요", "없어", "이제 없어" 등)이면 "YES"
+- 추가적인 아이디어나 질문, 의견이 들어 있다면 "NO"
+
+사용자 입력:
+{text}
 """)
 
 
