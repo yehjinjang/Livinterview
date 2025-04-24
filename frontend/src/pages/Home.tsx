@@ -27,7 +27,7 @@ export default function HomePage() {
         />
 
         <button
-            onClick={() => navigate("/survey")}
+            onClick={() => navigate("/login")}
             className="w-full max-w-xs bg-blue-600 text-white text-xl font-bold py-6 px-10 rounded-full shadow-lg hover:bg-blue-700 transition-all border-none mt-10"
             >
             시작하기 →

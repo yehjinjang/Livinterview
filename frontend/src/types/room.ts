@@ -4,8 +4,7 @@ export interface Room {
     address: string
     lat: number
     lng: number
-    price: number
+    price: string
     size: number
     imageUrl?: string
   }
-  
