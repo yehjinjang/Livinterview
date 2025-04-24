@@ -13,22 +13,27 @@ oauth.register(
     client_id=GOOGLE_CLIENT_ID,
     client_secret=GOOGLE_CLIENT_SECRET,
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'}
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
 )
 
 @router.get("")
 async def login_google(request: Request):
-    redirect_uri = request.url_for('auth_google_callback')
+    redirect_uri = "http://127.0.0.1:8000/auth/google/callback"
+    # print(" Google Login URL 생성")
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @router.get("/callback")
 async def auth_google_callback(request: Request):
     try:
+        # print("Google 콜백 호출됨")
         token = await oauth.google.authorize_access_token(request)
         user = token.get("userinfo")
+        print("Token:", token)
+        print("User Info:", user)
         request.session['user'] = user
         return RedirectResponse("http://localhost:5173/survey")
     except Exception as e:
         logger.error(f"Google Login Error: {e}")
         return JSONResponse(status_code=500, content={"detail": "Google login failed"})
-
