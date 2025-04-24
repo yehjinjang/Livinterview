@@ -56,7 +56,7 @@ async def auth_naver_callback(request: Request):
             request.session['user'] = user
             # print("네이버 사용자 정보:", user)
 
-            return RedirectResponse("http://localhost:5173/survey")
+            return RedirectResponse("http://localhost:5173/roomie")
     except Exception as e:
         logger.error(f"Naver Login Error: {e}")
         return JSONResponse(status_code=500, content={"detail": "Naver login failed"})

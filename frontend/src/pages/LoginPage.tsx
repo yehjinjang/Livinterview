@@ -5,10 +5,22 @@ export default function LoginPage() {
   const backend = import.meta.env.VITE_API_URL
   const navigate = useNavigate()
 
-  // 이미 로그인한 유저는 바로 survey로 이동
   useEffect(() => {
-    const user = sessionStorage.getItem("user") // 또는 localStorage
-    if (user) navigate("/survey")
+    fetch(`${backend}/me`, {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Not logged in")
+        return res.json()
+      })
+      .then((data) => {
+        console.log("✅ 로그인 상태 감지:", data)
+        sessionStorage.setItem("user", JSON.stringify(data)) // 저장해두기
+        navigate("/roomie") // 바로 이동
+      })
+      .catch(() => {
+        sessionStorage.removeItem("user") // 로그인 안 되어 있으면 유지
+      })
   }, [])
 
   const handleLogin = (provider: string) => {
@@ -16,25 +28,27 @@ export default function LoginPage() {
   }
 
   const handleGuestAccess = () => {
-    sessionStorage.removeItem("user") // 혹시라도 기존 로그인 흔적 제거
+    sessionStorage.removeItem("user")
     navigate("/roomie")
   }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50 px-4">
-            <div className="flex items-center gap-2 mb-8 animate-bounceLogo">
-            <img
-                src="/icons/main.png"
-                alt="ZIPUP 로고"
-                className="w-[50px] h-[50px]"
-            />
-            <span className="text-3xl font-black text-zipup-600">ZIPUP</span>
-            </div>
+      {/* 로고 영역 */}
+      <div className="flex items-center gap-2 mb-8 animate-bounceLogo">
+        <img
+          src="/icons/main.png"
+          alt="ZIPUP 로고"
+          className="w-[50px] h-[50px]"
+        />
+        <span className="text-3xl font-black text-zipup-600">ZIPUP</span>
+      </div>
 
       <p className="text-gray-600 text-sm mb-10 text-center">
-        아래 소셜 계정으로 간편하게 집업과의 여정을 떠나보세요!
+        우리 함께 집업과의 여정을 떠나봐요!
       </p>
 
+      {/* 소셜 로그인 버튼 */}
       <div className="space-y-4 w-full max-w-xs">
         <button
           onClick={() => handleLogin("google")}
@@ -61,13 +75,13 @@ export default function LoginPage() {
         </button>
       </div>
 
-      {/* 비회원 접근 */}
-      <button
+      {/* 비회원으로 이용 */}
+      {/* <button
         onClick={handleGuestAccess}
         className="mt-6 text-xs text-gray-400 hover:underline transition"
       >
         비회원으로 둘러보기
-      </button>
+      </button> */}
     </div>
   )
 }

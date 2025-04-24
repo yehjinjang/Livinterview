@@ -33,7 +33,7 @@ async def auth_google_callback(request: Request):
         print("Token:", token)
         print("User Info:", user)
         request.session['user'] = user
-        return RedirectResponse("http://localhost:5173/survey")
+        return RedirectResponse("http://localhost:5173/roomie")
     except Exception as e:
         logger.error(f"Google Login Error: {e}")
         return JSONResponse(status_code=500, content={"detail": "Google login failed"})

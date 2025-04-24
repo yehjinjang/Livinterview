@@ -5,14 +5,27 @@ import { User, Star, LogOut } from "lucide-react"
 
 export default function ProfilePage() {
   const [email, setEmail] = useState<string>("")
+  const [name, setName] = useState<string>("")
   const navigate = useNavigate()
 
   useEffect(() => {
-    const userStr = sessionStorage.getItem("user")
-    if (userStr) {
-      const user = JSON.parse(userStr)
-      setEmail(user.email || "")
-    }
+    fetch("http://localhost:8000/me", {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Not logged in")
+        return res.json()
+      })
+      .then((data) => {
+        console.log("🙋 회원 정보:", data)
+        sessionStorage.setItem("user", JSON.stringify(data))
+        setEmail(data.email)
+        setName(data.name)
+      })
+      .catch(() => {
+        sessionStorage.removeItem("user")
+        navigate("/login")
+      })
   }, [])
 
   const handleLogout = () => {
@@ -22,14 +35,13 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col h-screen bg-white relative">
-      {/* 유저 정보 + 메뉴 묶기 */}
       <div className="flex flex-col items-center px-6 pt-48 pb-20">
         <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
           <User className="w-10 h-10" />
         </div>
-        <p className="mt-4 text-gray-800 font-medium">{email}</p>
+        <p className="mt-4 text-gray-800 font-medium text-lg">{name}</p>
+        <p className="text-sm text-gray-500">{email}</p>
 
-        {/* 메뉴 */}
         <div className="mt-10 w-full space-y-4">
           <div
             className="flex items-center justify-between border-t pt-4 cursor-pointer"
@@ -55,7 +67,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* 하단 탭바 */}
       <div className="absolute bottom-0 w-full">
         <BottomTabBar />
       </div>

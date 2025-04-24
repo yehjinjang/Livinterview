@@ -48,7 +48,7 @@ async def auth_kakao_callback(request: Request):
             # print("Kakao 사용자 정보:", user)
             request.session['user'] = user
 
-            return RedirectResponse("http://localhost:5173/survey")
+            return RedirectResponse("http://localhost:5173/roomie")
 
     except Exception as e:
         logger.error(f"Kakao Login Error: {e}")
