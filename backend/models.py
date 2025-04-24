@@ -7,6 +7,9 @@ from sqlalchemy import (
     TIMESTAMP,
     SmallInteger,
     DATE,
+    TEXT,
+    Float,
+    JSON,
 )
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func, expression
@@ -180,3 +183,40 @@ class HomieQnAHistory(Base):
         return {
             column.name: getattr(self, column.name) for column in self.__table__.columns
         }
+
+
+class SeoulDongCode(Base):
+    __tablename__ = "Seoul_dong_codes"
+
+    code = Column(String(20), primary_key=True)
+    full_name = Column(String(50), nullable=False)
+    gu_name = Column(String(10), nullable=False)
+    dong_name = Column(String(10), nullable=False)
+    short_code = Column(String(10), nullable=False)
+
+    def __repr__(self):
+        return f"<SeoulDongCode(code={self.code}, dong_name={self.dong_name})>"
+
+
+class SeoulRoom(Base):
+    __tablename__ = "Seoul_rooms"
+
+    id = Column(Integer, primary_key=True, autoincrement=True) 
+    dong_code = Column(String(20))
+    gu_name = Column(String(20))
+    dong_name = Column(String(20))
+    seq = Column(Integer)
+    room_type = Column(String(50))           
+    room_title = Column(String(255))        
+    room_desc = Column(TEXT)
+    price_type = Column(String(20)) 
+    price_info = Column(String(50)) 
+    img_url_list = Column(JSON) 
+    lat = Column(Float)
+    lng = Column(Float)
+    floor = Column(String(20))
+    area_m2 = Column(Float)
+    maintenance_fee = Column(Integer)
+
+    def __repr__(self):
+        return f"<SeoulRoom(id={self.id}, dong={self.dong_name}, title={self.room_title[:10]}...)>"
