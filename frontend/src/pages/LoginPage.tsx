@@ -14,7 +14,7 @@ export default function LoginPage() {
         return res.json()
       })
       .then((data) => {
-        console.log("✅ 로그인 상태 감지:", data)
+        console.log("로그인 상태 감지:", data)
         sessionStorage.setItem("user", JSON.stringify(data)) // 저장해두기
         navigate("/roomie") // 바로 이동
       })
