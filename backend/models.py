@@ -75,6 +75,7 @@ class HomieQuestion(Base):
     content = Column(String(50), nullable=False)
     input_type = Column(Enum(TypeEnum), nullable=False)
     icon_path = Column(String(100))
+    code = Column(SmallInteger, nullable=False)
     state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
     created_at = Column(TIMESTAMP, server_default=func.now())
     expired_at = Column(TIMESTAMP, nullable=True)
@@ -107,7 +108,7 @@ class HomieAnswer(Base):
         Integer, ForeignKey("Homie_questions.id"), nullable=False
     )
     content = Column(String(50), nullable=False)
-    score = Column(SmallInteger, nullable=False)
+    score = Column(SmallInteger, nullable=True)
     state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
     created_at = Column(TIMESTAMP, server_default=func.now())
     expired_at = Column(TIMESTAMP, nullable=True)
