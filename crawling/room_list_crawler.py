@@ -4,9 +4,9 @@ import re
 from pathlib import Path
 
 # ───── 경로 설정 ─────
-BASE_DIR = Path(__file__).resolve().parent
-CODE_CSV = BASE_DIR / "ref/seoul_dong_codes.csv"
-OUTPUT_CSV = BASE_DIR / "data/seoul_rooms.csv"
+SCRIPT_DIR = Path(__file__).resolve().parent
+CODE_CSV = SCRIPT_DIR / "seoul_dong_codes.csv"
+OUTPUT_CSV = SCRIPT_DIR / "seoul_rooms.csv"
 
 # ───── 기본 설정 ─────
 PAGE_SIZE   = 50
@@ -98,7 +98,7 @@ def crawl_all_dongs(code_csv: Path = CODE_CSV):
             try:
                 r = requests.get(BASE_URL, headers=HEADERS, params=params, timeout=20)
             except requests.exceptions.ReadTimeout:
-                print(f"[{dong_name}] page {page}: ❌ ReadTimeout 발생. 해당 페이지 스킵")
+                print(f"[{dong_name}] page {page}: ReadTimeout 발생. 해당 페이지 스킵")
                 break
 
             if r.status_code != 200:
