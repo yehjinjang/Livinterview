@@ -1,30 +1,38 @@
 import { useState } from "react"
 import MapView from "../components/MapView"
 import RoomInfo from "../components/RoomInfo"
-import RoomDetail from "../pages/RoomieDetail"
+import RoomDetail from "./RoomieDetail"
 import BottomTabBar from "../components/BottomTabBar"
+import FilterCard from "../components/FilterCard"
 import { Room } from "../types/room"
 
 export default function RoomieHome() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null)
-  const [showDetail, setShowDetail] = useState(false) // 상세 모달 상태
+  const [showDetail, setShowDetail] = useState(false)
 
   return (
-    <div className="w-full h-screen flex flex-col relative">
-      <div className="flex-1 relative">
-        <MapView onPinClick={(room) => {
-          setSelectedRoom(room)
-          setShowDetail(false) // 처음엔 요약부터
-        }} />
+    <div className="flex flex-col w-full h-screen relative">
+      <FilterCard onFilterChange={(filters) => console.log("필터 변경됨", filters)} />
+
+      {/* 지도 영역  */}
+      <div className="flex-1">
+        <MapView
+          onPinClick={(room) => {
+            setSelectedRoom(room)
+            setShowDetail(false)
+          }}
+        />
       </div>
 
-      <BottomTabBar />
+      <div className="h-14">
+        <BottomTabBar />
+      </div>
 
-      {/* RoomInfo modal */}
+      {/* 요약 정보 모달 */}
       {selectedRoom && !showDetail && (
         <RoomInfo
           room={selectedRoom}
-          onExpand={() => setShowDetail(true)} // 다시 탭 → 확장
+          onExpand={() => setShowDetail(true)}
           onClose={() => setSelectedRoom(null)}
         />
       )}

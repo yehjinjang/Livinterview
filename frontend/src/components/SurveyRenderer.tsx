@@ -71,30 +71,54 @@ export default function SurveyRenderer({
       )
       case "range":
         const [tempValue, setTempValue] = useState<number | null>(null)
+        const [isInvalid, setIsInvalid] = useState(false)
       
         return (
           <div className="flex flex-col gap-3">
-            {/* 입력과 버튼을 전체적으로 왼쪽, 위로  */}
-            <div className="flex items-center gap-2 ml-3 mt-">
+            <div className="flex pl-2 items-center gap-3 ml-3">
               <input
-                type="number"
-                placeholder="예: 6"
-                className="flex-1 border p-2 rounded"
+                type="text"
+                placeholder="예: 6 (숫자만 입력 가능해요)"
+                className={`flex-1 border p-2 p1-5 rounded transition-all duration-300 ${
+                  isInvalid ? "border-red-500 animate-shake" : "border-gray-300"
+                }`}
                 value={tempValue ?? ""}
-                onChange={(e) => setTempValue(Number(e.target.value))}
+                onChange={(e) => {
+                  const value = e.target.value
+      
+                  if (value === "") {
+                    setTempValue(null)
+                    setIsInvalid(false)
+                    return
+                  }
+      
+                  if (!/^\d+$/.test(value)) {
+                    setIsInvalid(true)
+                    setTimeout(() => setIsInvalid(false), 300) // 애니메이션 초기화
+                    return
+                  }
+      
+                  setTempValue(Number(value))
+                  setIsInvalid(false)
+                }}
               />
+      
               <button
-                onClick={() =>
+                onClick={() => {
+                  if (tempValue === null || isNaN(tempValue)) {
+                    setIsInvalid(true)
+                    setTimeout(() => setIsInvalid(false), 300)
+                    return
+                  }
+      
                   onAnswer({ [question.rangeIds?.[0] ?? "min"]: tempValue })
-                }
+                }}
                 className="ml-1 px-3 py-2 bg-zipup-600 text-white rounded-2xl hover:bg-blue-700 transition"
-                disabled={tempValue === null}
               >
                 입력 완료
               </button>
             </div>
       
-            {/* 건너뛰기 버튼 */}
             <div className="flex justify-end mr-2">
               <button
                 onClick={() =>
@@ -106,7 +130,7 @@ export default function SurveyRenderer({
               </button>
             </div>
           </div>
-        )
+        )              
 
         case "autocomplete":
           const [inputValue, setInputValue] = useState("")
@@ -117,30 +141,27 @@ export default function SurveyRenderer({
           )
         
           return (
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-3 text-left">
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => {
                   setInputValue(e.target.value)
-                  setSelectedOption(null) // 입력이 바뀌면 선택 초기화
+                  setSelectedOption(null)
                 }}
                 placeholder="지하철역 이름을 입력하세요"
                 className="w-full border border-gray-300 rounded p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                autoFocus
               />
         
-              {inputValue.length > 0 && (
+              {!selectedOption && inputValue.length > 0 && (
                 <ul className="border rounded shadow bg-white max-h-48 overflow-y-auto">
                   {filteredOptions?.map((opt) => (
                     <li
                       key={opt}
                       onClick={() => {
-                        if (selectedOption === opt) {
-                          onAnswer(opt) // 두 번 클릭 시 확정
-                        } else {
-                          setSelectedOption(opt)
-                          setInputValue(opt) // 선택된 항목 input에 채우기
-                        }
+                        setSelectedOption(opt)
+                        setInputValue(opt) // input에 선택된 값 표시
                       }}
                       className={`px-4 py-2 cursor-pointer ${
                         selectedOption === opt ? "bg-blue-100" : "hover:bg-gray-100"
@@ -154,8 +175,24 @@ export default function SurveyRenderer({
                   )}
                 </ul>
               )}
+        
+              <button
+                onClick={() => {
+                  if (selectedOption) {
+                    onAnswer(selectedOption)
+                  }
+                }}
+                disabled={!selectedOption}
+                className={`mt-2 px-4 py-2 rounded-2xl text-white transition ${
+                  selectedOption
+                    ? "bg-zipup-600 hover:bg-blue-700"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
+              >
+                선택 완료
+              </button>
             </div>
-          )
+          )             
 
     default:
       return (

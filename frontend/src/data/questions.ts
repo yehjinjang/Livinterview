@@ -399,7 +399,7 @@ export const questions: Question[] = [
   {
     id: "area_range",
     category: "주거",
-    title: "찾으시는 오피스텔의 최소/최대 평수를 입력해주세요.",
+    title: "찾으시는 오피스텔의 최소 평수를 입력해주세요.",
     type: "range",
     unit: "평",
     min: 0,
