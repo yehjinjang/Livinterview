@@ -3,12 +3,28 @@ import requests
 import re
 from pathlib import Path
 
-# ───── 경로 설정 ─────
-SCRIPT_DIR = Path(__file__).resolve().parent
-CODE_CSV = SCRIPT_DIR / "seoul_dong_codes.csv"
-OUTPUT_CSV = SCRIPT_DIR / "seoul_rooms.csv"
+# ORM 및 DB 연결
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-# ───── 기본 설정 ─────
+
+import sys
+from pathlib import Path
+# Livinterview 디렉토리를 sys.path에 추가
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from backend.models import SeoulRoom
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DB_URL")
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
+
+
+# ───── 기본 설정 (유지) ─────
 PAGE_SIZE   = 50
 MAX_PAGES   = 20
 ZOOM        = 13
@@ -66,9 +82,40 @@ def parse_room_desc(desc):
                 fee = float(re.sub(r"[^\d.]", "", fee_raw) or 0)
     return pd.Series([floor, area, int(fee)])
 
+
+# ───── 수동 매핑 함수 ─────
+def df_to_seoulroom_records(df):
+    # NaN 값을 None으로 변환 (MySQL 저장 오류 방지)
+    df = df.replace({pd.NA: None, pd.NaT: None, float('nan'): None})
+
+    mapped_records = []
+    for _, row in df.iterrows():
+        record = {
+            "dong_code": str(row.get("dong_code") or "").strip(),
+            "gu_name": str(row.get("gu_name") or "").strip(),
+            "dong_name": str(row.get("dong_name") or "").strip(),
+            "seq": int(row.get("seq") or 0),
+            "room_type": str(row.get("roomTypeName") or "").strip(),
+            "room_title": str(row.get("roomTitle") or "").strip(),
+            "room_desc": str(row.get("roomDesc") or "").strip(),
+            "price_type": str(row.get("priceTypeName") or "").strip(),
+            "price_info": str(row.get("priceTitle") or "").strip(),
+            "img_url_list": json.dumps(row.get("imgUrlList") or []),
+            "lat": row.get("lat") if pd.notna(row.get("lat")) else None,
+            "lng": row.get("lng") if pd.notna(row.get("lng")) else None,
+            "floor": str(row.get("floor") or "").strip(),
+            "area_m2": row.get("area_m2") if pd.notna(row.get("area_m2")) else None,
+            "maintenance_fee": int(row.get("maintenance_fee") or 0),
+        }
+        mapped_records.append(record)
+    return mapped_records
+
+
 # ───── 메인 크롤링 함수 ─────
-def crawl_all_dongs(code_csv: Path = CODE_CSV):
-    dong_df = pd.read_csv(code_csv)
+# 함수명 + CSV 제거 + DB 저장 로직으로 변경
+def crawl_all_dongs():
+    session = SessionLocal()
+    dong_df = pd.read_sql("SELECT * FROM Seoul_dong_codes", session.bind)
     dong_df["code"] = dong_df["code"].astype(str)
 
     all_rows = []
@@ -139,11 +186,21 @@ def crawl_all_dongs(code_csv: Path = CODE_CSV):
         df = pd.DataFrame(all_rows)
         df[["floor", "area_m2", "maintenance_fee"]] = df["roomDesc"].apply(parse_room_desc)
         df = df[["dong_code", "gu_name", "dong_name"] + KEEP_COLS + ["lat", "lng", "floor", "area_m2", "maintenance_fee"]]
-        OUTPUT_CSV.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(OUTPUT_CSV, index=False, encoding="utf-8-sig")
-        print(f"전체 저장 완료 → {OUTPUT_CSV}")
+
+        # ORM 기반 DB 저장
+        try:
+            records = df_to_seoulroom_records(df)  # 수동 맵핑 적용
+            session.bulk_insert_mappings(SeoulRoom, records)
+            session.commit()
+            print("✅ DB 저장 완료 → seoul_rooms 테이블")
+
+        except Exception as e:
+            session.rollback()
+            print(f"⛔ 저장 실패: {e}")
+        finally:
+            session.close()
     else:
-        print("저장할 데이터가 없습니다.")
+        print("⛔ 저장할 데이터가 없습니다.")
 
 if __name__ == "__main__":
     crawl_all_dongs()
