@@ -6,6 +6,7 @@ import { User, Star, LogOut } from "lucide-react"
 export default function ProfilePage() {
   const [email, setEmail] = useState<string>("")
   const [name, setName] = useState<string>("")
+  const [provider, setProvider] = useState<string>("") // 로그인 플랫폼
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -17,10 +18,15 @@ export default function ProfilePage() {
         return res.json()
       })
       .then((data) => {
-        console.log("🙋 회원 정보:", data)
+        console.log("🙋 전체 회원 정보:", data)
+        console.log("🛡 로그인 소셜:", data.provider)
+        console.log("🧑‍💻 이름:", data.name)
+        console.log("📧 이메일:", data.email)
+
         sessionStorage.setItem("user", JSON.stringify(data))
         setEmail(data.email)
         setName(data.name)
+        setProvider(data.provider)
       })
       .catch(() => {
         sessionStorage.removeItem("user")
@@ -39,8 +45,15 @@ export default function ProfilePage() {
         <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
           <User className="w-10 h-10" />
         </div>
+
         <p className="mt-4 text-gray-800 font-medium text-lg">{name}</p>
         <p className="text-sm text-gray-500">{email}</p>
+        {/* 추가: 소셜 플랫폼 표시 */}
+        {provider && (
+          <p className="text-xs text-gray-400 mt-1">
+            로그인 플랫폼: {provider.toUpperCase()}
+          </p>
+        )}
 
         <div className="mt-10 w-full space-y-4">
           <div

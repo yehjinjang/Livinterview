@@ -35,7 +35,7 @@ export default function LoginPage() {
         <img
           src="/icons/main.png"
           alt="ZIPUP 로고"
-          className="w-[50px] h-[50px]"
+          className="w-[50px]"
         />
         <span className="text-3xl font-black text-zipup-600">ZIPUP</span>
       </div>

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 @router.get("")
 async def login_naver(request: Request):
-    redirect_uri = "http://127.0.0.1:8000/auth/naver/callback"
+    redirect_uri = "http://localhost:8000/auth/naver/callback"
     state = "randomstate123"
 
     login_url = (
@@ -33,7 +33,7 @@ async def auth_naver_callback(request: Request):
         print("Code:", code)
         print("State:", state)
 
-        redirect_uri = "http://127.0.0.1:8000/auth/naver/callback"
+        redirect_uri = "http://localhost:8000/auth/naver/callback"
         async with httpx.AsyncClient() as client:
             token_res = await client.post(
                 "https://nid.naver.com/oauth2.0/token",
