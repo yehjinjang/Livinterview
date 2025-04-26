@@ -24,13 +24,13 @@ export default function ProfilePage() {
       })
       .catch(() => {
         sessionStorage.removeItem("user")
-        navigate("/login")
+        navigate("/profile")
       })
   }, [])
 
   const handleLogout = () => {
     sessionStorage.removeItem("user")
-    navigate("/login")
+    navigate("/profile")
   }
 
   return (
