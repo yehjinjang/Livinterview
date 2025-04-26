@@ -27,10 +27,6 @@ export default function LoginPage() {
     window.location.href = `${backend}/auth/${provider}`
   }
 
-  const handleGuestAccess = () => {
-    sessionStorage.removeItem("user")
-    navigate("/roomie")
-  }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50 px-4">
@@ -45,7 +41,7 @@ export default function LoginPage() {
       </div>
 
       <p className="text-gray-600 text-sm mb-10 text-center">
-        우리 함께 집업과의 여정을 떠나봐요!
+        함께 집업과의 여정을 떠나봐요!
       </p>
 
       {/* 소셜 로그인 버튼 */}
