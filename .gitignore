@@ -7,10 +7,12 @@ venv/
 .DS_Store
 
 models/
-# data/
+data/
 node_modules/
 dist/
 *.tsbuildinfo
 node_modules/.tmp/
 .DS_Store
+
 __pycache__/
+*.sqlite3
