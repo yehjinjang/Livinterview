@@ -29,7 +29,6 @@ export default function RangeSlider({
   min,
   max,
   step,
-  unit,
   value,
   onChange,
 }: Props) {
