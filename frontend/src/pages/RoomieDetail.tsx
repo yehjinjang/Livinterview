@@ -29,7 +29,7 @@ export default function RoomDetailModal({
       {/* 매물 이미지 예시 */}
       <div className="w-full h-60 bg-gray-100 flex items-center justify-center">
         <img
-          src={room.imageUrl || "/icons/report/life/center.svg"}
+          src={room.imageUrl || "/icons/images.jpg"}
           alt="매물 사진"
           className="object-cover w-full h-full"
         />

@@ -10,6 +10,20 @@ interface Props {
   onChange: (val: [number, number]) => void
 }
 
+// 금액 포맷팅 
+function formatPrice(val: number) {
+  if (val >= 10000) {
+    const 억 = Math.floor(val / 10000)
+    const 천 = val % 10000
+    if (천 === 0) {
+      return `${억}억`
+    } else {
+      return `${억}억 ${천}만`
+    }
+  }
+  return `${val}만`
+}
+
 export default function RangeSlider({
   label,
   min,
@@ -19,14 +33,20 @@ export default function RangeSlider({
   value,
   onChange,
 }: Props) {
+  const isValid = value.length === 2 && value[0] !== value[1] && value[0] >= min && value[1] <= max
+
+  if (!isValid) {
+    return null
+  }
+
   return (
     <div className="space-y-2">
       {/* 라벨 및 값 범위 */}
       <div>
         <p className="text-sm font-semibold">{label}</p>
         <div className="flex justify-between text-xs text-gray-600 mt-1">
-          <span>{value[0]}{unit}</span>
-          <span>{value[1]}{unit}</span>
+          <span>{formatPrice(value[0])}</span>
+          <span>{formatPrice(value[1])}</span>
         </div>
       </div>
 
