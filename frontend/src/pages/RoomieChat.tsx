@@ -17,7 +17,7 @@ export default function RoomieChat() {
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  // 방 사진 분석 함수
+  // 🔵 방 사진 분석
   const analyzeImage = async (url: string) => {
     const res = await fetch(url)
     const blob = await res.blob()
@@ -33,15 +33,15 @@ export default function RoomieChat() {
     return data.description
   }
 
-  // 초기 메시지 등록
+  // 🔵 초기 메시지 등록
   useEffect(() => {
     const init = async () => {
       if (imageUrl) {
         const description = await analyzeImage(imageUrl)
 
         setMessages([
-          { type: "text", text: "나는 너의 인테리어 도우미 Roomie야! 🏡", sender: "bot" },
           { type: "image", src: imageUrl, sender: "bot" },
+          { type: "text", text: "나는 너의 인테리어 도우미 Roomie야!", sender: "bot" },
           { type: "text", text: `이 방은 ${description}이야. 어떤 스타일로 꾸미고 싶어?`, sender: "bot" },
         ])
       }
@@ -49,12 +49,11 @@ export default function RoomieChat() {
     init()
   }, [imageUrl])
 
-  // 자동 스크롤
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  // 메시지 전송
+  // 🔵 사용자 입력 전송
   const sendMessage = async () => {
     if (!input.trim()) return
 
@@ -99,9 +98,76 @@ export default function RoomieChat() {
     }
   }
 
+  // 🔵 대화 요약 + ControlNet 프롬프트 요청 + 인테리어 이미지 생성
+  const summarizeAndGenerateImage = async () => {
+    if (loading) return
+    setLoading(true)
+
+    try {
+      setMessages(prev => [...prev, { type: "text", text: "인테리어 이미지를 생성하고 있어! 잠깐만 기다려줘 🔥", sender: "bot" }])
+
+      const conversation = messages
+        .filter(m => m.type === "text")
+        .map(m => `${m.sender === "user" ? "사용자" : "Roomie"}: ${m.text}`)
+        .join("\n")
+
+      // 1. 대화 요약
+      const summaryRes = await fetch("http://localhost:8000/analyze/summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversation }),
+      })
+      const summaryData = await summaryRes.json()
+
+      // 2. 프롬프트 생성
+      const promptRes = await fetch("http://localhost:8000/analyze/controlnet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ summary: summaryData.result }),
+      })
+      const promptData = await promptRes.json()
+
+      const prompt = promptData.result
+
+      // 3. 인테리어 이미지 생성
+      const generatedImageUrl = await generateFakeImage(prompt)
+
+      setMessages(prev => [
+        ...prev,
+        { type: "text", text: `요약 완료!\n\n${summaryData.result}`, sender: "bot" },
+        { type: "text", text: "이 스타일로 꾸며봤어!", sender: "bot" },
+        { type: "image", src: generatedImageUrl, sender: "bot" },
+      ])
+    } catch (error) {
+      console.error("❌ 요약/생성 실패:", error)
+      setMessages(prev => [...prev, { type: "text", text: "이미지 생성에 실패했어. 다시 시도해줘!", sender: "bot" }])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 🔵 (임시) 이미지 생성 API
+  const generateFakeImage = async (prompt: string) => {
+    console.log("🖼️ 생성 프롬프트:", prompt)
+
+    try {
+      const response = await fetch("http://localhost:8000/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      })
+
+      const data = await response.json()
+      return data.image_url
+    } catch (error) {
+      console.error("❌ 이미지 생성 실패:", error)
+      return "/icons/images.jpg"
+    }
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* 메시지 리스트 */}
+      {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, idx) => (
           <div
@@ -130,7 +196,7 @@ export default function RoomieChat() {
         <div ref={bottomRef} />
       </div>
 
-      {/* 입력창 */}
+      {/* 입력창 + 인테리어 생성 버튼 */}
       <div className="p-3 bg-white border-t flex gap-2">
         <input
           value={input}
@@ -146,6 +212,13 @@ export default function RoomieChat() {
           disabled={loading}
         >
           {loading ? "..." : "전송"}
+        </button>
+        <button
+          onClick={summarizeAndGenerateImage}
+          className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-2 rounded-full text-sm"
+          disabled={loading}
+        >
+          {loading ? "생성 중..." : "인테리어 생성"}
         </button>
       </div>
     </div>
