@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react"
 import ChatMessageList from "../components/ChatMessageList"
 import MessageInput from "../components/MessageInput"
 import TypingBubble from "../components/TypingBubble"
+import LoadingSpinner from "../components/LoadingSpinner"
 
 interface ChatMessage {
   type: "text" | "image"
@@ -21,6 +22,7 @@ export default function RoomieChat() {
   const [typingText, setTypingText] = useState<string>("")
   const [isSending, setIsSending] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isAnalyzing, setIsAnalyzing] = useState(true)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const analyzeImage = async (url: string) => {
@@ -49,6 +51,7 @@ export default function RoomieChat() {
           { type: "text", text: "나는 너의 인테리어 도우미 Roomie야!", sender: "bot" },
           { type: "text", text: `이 방은 ${description} 어떤 스타일로 꾸미고 싶어?`, sender: "bot" },
         ])
+        setIsAnalyzing(false)
       }
     }
     init()
@@ -154,6 +157,10 @@ export default function RoomieChat() {
     } catch {
       return "/icons/images.jpg"
     }
+  }
+
+  if (isAnalyzing) {
+    return <LoadingSpinner text="방 분석 중...잠시만 기다려주세요!" />
   }
 
   return (
