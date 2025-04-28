@@ -1,5 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom"
 import { useEffect, useState, useRef } from "react"
+import ChatMessageList from "../components/ChatMessageList"
+import MessageInput from "../components/MessageInput"
+import TypingBubble from "../components/TypingBubble"
 
 interface ChatMessage {
   type: "text" | "image"
@@ -15,36 +18,32 @@ export default function RoomieChat() {
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState<string>("")
-  const [loading, setLoading] = useState(false)
+  const [typingText, setTypingText] = useState<string>("")
+  const [isSending, setIsSending] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  // 방 사진 분석
   const analyzeImage = async (url: string) => {
     try {
       const res = await fetch(url)
       const blob = await res.blob()
       const formData = new FormData()
       formData.append("image", new File([blob], "room.jpg"))
-
       const response = await fetch("http://localhost:8000/analyze-image", {
         method: "POST",
         body: formData,
       })
-
       const data = await response.json()
       return data.description
-    } catch (error) {
-      console.error("❌ 방 분석 실패:", error)
-      return "방 사진을 분석하는 데 실패했어."
+    } catch {
+      return "방 사진 분석 실패"
     }
   }
 
-  // 초기 메시지 등록
   useEffect(() => {
     const init = async () => {
       if (imageUrl) {
         const description = await analyzeImage(imageUrl)
-
         setMessages([
           { type: "image", src: imageUrl, sender: "bot" },
           { type: "text", text: "나는 너의 인테리어 도우미 Roomie야!", sender: "bot" },
@@ -57,26 +56,22 @@ export default function RoomieChat() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+  }, [messages, typingText])
 
-  // 사용자 입력 전송
   const sendMessage = async () => {
-    if (!input.trim() || loading) return
+    if (!input.trim() || isSending || isGenerating) return
 
     const userMessage = input.trim()
     setMessages(prev => [...prev, { type: "text", text: userMessage, sender: "user" }])
     setInput("")
-    setLoading(true)
+    setIsSending(true)
 
     try {
-      const formattedMessages = messages.map(m => {
-        if (m.type === "image") {
-          return { role: "assistant", content: `방 사진이 있어: ${m.src}` }
-        } else {
-          return { role: m.sender === "user" ? "user" : "assistant", content: m.text || "" }
-        }
-      })
-
+      const formattedMessages = messages.map(m =>
+        m.type === "image"
+          ? { role: "assistant", content: `방 사진이 있어: ${m.src}` }
+          : { role: m.sender === "user" ? "user" : "assistant", content: m.text || "" }
+      )
       formattedMessages.push({ role: "user", content: userMessage })
 
       const response = await fetch("http://localhost:8000/chat", {
@@ -86,25 +81,38 @@ export default function RoomieChat() {
       })
 
       const data = await response.json()
-      setMessages(prev => [...prev, { type: "text", text: data.reply, sender: "bot" }])
-    } catch (error) {
-      console.error("❌ 채팅 오류:", error)
-      setMessages(prev => [...prev, { type: "text", text: "서버 오류로 답변을 받을 수 없어. 다시 시도해줘!", sender: "bot" }])
-    } finally {
-      setLoading(false)
+      typeWriterEffect(data.reply)
+    } catch {
+      setMessages(prev => [...prev, { type: "text", text: "서버 오류", sender: "bot" }])
+      setIsSending(false)
     }
   }
 
-  // 대화 요약 + 인테리어 이미지 생성 후 결과 페이지 이동
+  const typeWriterEffect = (fullText: string) => {
+    setTypingText("")
+    let index = 0
+    const typing = () => {
+      if (index < fullText.length) {
+        setTypingText(prev => prev + fullText[index])
+        index++
+        setTimeout(typing, 30)
+      } else {
+        setMessages(prev => [...prev, { type: "text", text: fullText, sender: "bot" }])
+        setTypingText("")
+        setIsSending(false)
+      }
+    }
+    typing()
+  }
+
   const summarizeAndGenerateImage = async () => {
-    if (loading) return
-    setLoading(true)
+    if (isSending || isGenerating) return
+    setIsGenerating(true)
 
     try {
-      setMessages(prev => [...prev, { type: "text", text: "인테리어 이미지를 생성 중이야... 🔥", sender: "bot" }])
+      setMessages(prev => [...prev, { type: "text", text: "인테리어 생성 중...🔥", sender: "bot" }])
 
-      const conversation = messages
-        .filter(m => m.type === "text")
+      const conversation = messages.filter(m => m.type === "text")
         .map(m => `${m.sender === "user" ? "사용자" : "Roomie"}: ${m.text}`)
         .join("\n")
 
@@ -122,94 +130,48 @@ export default function RoomieChat() {
       })
       const promptData = await promptRes.json()
 
-      const prompt = promptData.result
-      const generatedImageUrl = await generateImage(prompt)
+      const generatedImageUrl = await generateImage(promptData.result)
 
-      // 생성 완료 → 결과 페이지로 이동
       navigate("/roomie-result", {
-        state: {
-          originalImage: imageUrl,
-          generatedImage: generatedImageUrl,
-          title: title,
-        }
+        state: { originalImage: imageUrl, generatedImage: generatedImageUrl, title }
       })
-    } catch (error) {
-      console.error("❌ 요약 또는 생성 실패:", error)
-      setMessages(prev => [...prev, { type: "text", text: "인테리어 이미지를 생성하는 데 실패했어. 다시 시도해줘!", sender: "bot" }])
+    } catch {
+      setMessages(prev => [...prev, { type: "text", text: "이미지 생성 실패", sender: "bot" }])
     } finally {
-      setLoading(false)
+      setIsGenerating(false)
     }
   }
 
-  // 이미지 생성 API 호출
   const generateImage = async (prompt: string) => {
-    console.log("🖼️ 생성 프롬프트:", prompt)
-
     try {
-      const response = await fetch("http://localhost:8000/generate-image", {
+      const res = await fetch("http://localhost:8000/generate-image", {
         method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
       })
-
-      const data = await response.json()
+      const data = await res.json()
       return data.image_url
-    } catch (error) {
-      console.error("❌ 이미지 생성 오류:", error)
+    } catch {
       return "/icons/images.jpg"
     }
   }
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-            {msg.type === "image" ? (
-              <img src={msg.src} alt="매물 이미지" className="rounded-lg shadow w-64 h-40 object-cover" />
-            ) : (
-              <div
-                className={`p-3 rounded-2xl max-w-[70%] text-sm ${
-                  msg.sender === "user" ? "bg-blue-500 text-white" : "bg-white text-gray-800 border"
-                }`}
-              >
-                {msg.text}
-              </div>
-            )}
-          </div>
-        ))}
+        <ChatMessageList messages={messages} />
+        {typingText && <TypingBubble text={typingText} />}
         <div ref={bottomRef} />
       </div>
 
-      {/* 입력창 + 인테리어 생성 버튼 */}
-      <div className="p-3 bg-white border-t flex gap-2">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") sendMessage() }}
-          placeholder="메시지를 입력하세요"
-          className="border rounded-full px-4 py-2 flex-1 text-sm"
-          disabled={loading}
-        />
-        <button
-          onClick={sendMessage}
-          className="bg-zipup-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm"
-          disabled={loading}
-        >
-          {loading ? "..." : "전송"}
-        </button>
-        <button
-          onClick={summarizeAndGenerateImage}
-          className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-2 rounded-full text-sm"
-          disabled={loading}
-        >
-          {loading ? "생성 중..." : "인테리어 생성"}
-        </button>
-      </div>
+      <MessageInput
+        input={input}
+        setInput={setInput}
+        isSending={isSending || typingText.length > 0}
+        isGenerating={isGenerating}
+        sendMessage={sendMessage}
+        summarizeAndGenerateImage={summarizeAndGenerateImage}
+      />
     </div>
   )
 }
