@@ -9,10 +9,8 @@ export default function RoomieChat() {
   const [input, setInput] = useState<string>("")
   const [loading, setLoading] = useState(false)
 
-  // 첫 매물 이미지, 안내 메시지 등록
   useEffect(() => {
     if (imageUrl) {
-        
       setMessages([
         { type: "image", src: imageUrl },
         { type: "text", text: `이 방은 "${title}"이야. 어떤 스타일로 꾸미고 싶어?` },
@@ -80,7 +78,6 @@ export default function RoomieChat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") sendMessage() }}
-          className="border rounded-lg p-2 flex-1"
           placeholder="메시지를 입력하세요"
           disabled={loading}
         />
