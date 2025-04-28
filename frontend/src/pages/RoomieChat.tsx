@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useEffect, useState, useRef } from "react"
 
 interface ChatMessage {
@@ -10,6 +10,7 @@ interface ChatMessage {
 
 export default function RoomieChat() {
   const location = useLocation()
+  const navigate = useNavigate()
   const { imageUrl, title } = location.state || {}
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -17,23 +18,28 @@ export default function RoomieChat() {
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  // 🔵 방 사진 분석
+  // 방 사진 분석
   const analyzeImage = async (url: string) => {
-    const res = await fetch(url)
-    const blob = await res.blob()
-    const formData = new FormData()
-    formData.append("image", new File([blob], "room.jpg"))
+    try {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const formData = new FormData()
+      formData.append("image", new File([blob], "room.jpg"))
 
-    const response = await fetch("http://localhost:8000/analyze-image", {
-      method: "POST",
-      body: formData,
-    })
+      const response = await fetch("http://localhost:8000/analyze-image", {
+        method: "POST",
+        body: formData,
+      })
 
-    const data = await response.json()
-    return data.description
+      const data = await response.json()
+      return data.description
+    } catch (error) {
+      console.error("❌ 방 분석 실패:", error)
+      return "방 사진을 분석하는 데 실패했어."
+    }
   }
 
-  // 🔵 초기 메시지 등록
+  // 초기 메시지 등록
   useEffect(() => {
     const init = async () => {
       if (imageUrl) {
@@ -42,7 +48,7 @@ export default function RoomieChat() {
         setMessages([
           { type: "image", src: imageUrl, sender: "bot" },
           { type: "text", text: "나는 너의 인테리어 도우미 Roomie야!", sender: "bot" },
-          { type: "text", text: `이 방은 ${description}이야. 어떤 스타일로 꾸미고 싶어?`, sender: "bot" },
+          { type: "text", text: `이 방은 ${description} 어떤 스타일로 꾸미고 싶어?`, sender: "bot" },
         ])
       }
     }
@@ -53,12 +59,11 @@ export default function RoomieChat() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  // 🔵 사용자 입력 전송
+  // 사용자 입력 전송
   const sendMessage = async () => {
-    if (!input.trim()) return
+    if (!input.trim() || loading) return
 
     const userMessage = input.trim()
-
     setMessages(prev => [...prev, { type: "text", text: userMessage, sender: "user" }])
     setInput("")
     setLoading(true)
@@ -66,15 +71,9 @@ export default function RoomieChat() {
     try {
       const formattedMessages = messages.map(m => {
         if (m.type === "image") {
-          return {
-            role: "assistant",
-            content: `방 사진이 있어: ${m.src}`,
-          }
+          return { role: "assistant", content: `방 사진이 있어: ${m.src}` }
         } else {
-          return {
-            role: m.sender === "user" ? "user" : "assistant",
-            content: m.text || "",
-          }
+          return { role: m.sender === "user" ? "user" : "assistant", content: m.text || "" }
         }
       })
 
@@ -82,36 +81,33 @@ export default function RoomieChat() {
 
       const response = await fetch("http://localhost:8000/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: formattedMessages }),
       })
 
       const data = await response.json()
       setMessages(prev => [...prev, { type: "text", text: data.reply, sender: "bot" }])
     } catch (error) {
-      console.error("❌ 서버 통신 오류:", error)
-      setMessages(prev => [...prev, { type: "text", text: "서버와 연결할 수 없습니다.", sender: "bot" }])
+      console.error("❌ 채팅 오류:", error)
+      setMessages(prev => [...prev, { type: "text", text: "서버 오류로 답변을 받을 수 없어. 다시 시도해줘!", sender: "bot" }])
     } finally {
       setLoading(false)
     }
   }
 
-  // 🔵 대화 요약 + ControlNet 프롬프트 요청 + 인테리어 이미지 생성
+  // 대화 요약 + 인테리어 이미지 생성 후 결과 페이지 이동
   const summarizeAndGenerateImage = async () => {
     if (loading) return
     setLoading(true)
 
     try {
-      setMessages(prev => [...prev, { type: "text", text: "인테리어 이미지를 생성하고 있어! 잠깐만 기다려줘 🔥", sender: "bot" }])
+      setMessages(prev => [...prev, { type: "text", text: "인테리어 이미지를 생성 중이야... 🔥", sender: "bot" }])
 
       const conversation = messages
         .filter(m => m.type === "text")
         .map(m => `${m.sender === "user" ? "사용자" : "Roomie"}: ${m.text}`)
         .join("\n")
 
-      // 1. 대화 요약
       const summaryRes = await fetch("http://localhost:8000/analyze/summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,7 +115,6 @@ export default function RoomieChat() {
       })
       const summaryData = await summaryRes.json()
 
-      // 2. 프롬프트 생성
       const promptRes = await fetch("http://localhost:8000/analyze/controlnet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,39 +123,42 @@ export default function RoomieChat() {
       const promptData = await promptRes.json()
 
       const prompt = promptData.result
+      const generatedImageUrl = await generateImage(prompt)
 
-      // 3. 인테리어 이미지 생성
-      const generatedImageUrl = await generateFakeImage(prompt)
-
-      setMessages(prev => [
-        ...prev,
-        { type: "text", text: `요약 완료!\n\n${summaryData.result}`, sender: "bot" },
-        { type: "text", text: "이 스타일로 꾸며봤어!", sender: "bot" },
-        { type: "image", src: generatedImageUrl, sender: "bot" },
-      ])
+      // 생성 완료 → 결과 페이지로 이동
+      navigate("/roomie-result", {
+        state: {
+          originalImage: imageUrl,
+          generatedImage: generatedImageUrl,
+          title: title,
+        }
+      })
     } catch (error) {
-      console.error("❌ 요약/생성 실패:", error)
-      setMessages(prev => [...prev, { type: "text", text: "이미지 생성에 실패했어. 다시 시도해줘!", sender: "bot" }])
+      console.error("❌ 요약 또는 생성 실패:", error)
+      setMessages(prev => [...prev, { type: "text", text: "인테리어 이미지를 생성하는 데 실패했어. 다시 시도해줘!", sender: "bot" }])
     } finally {
       setLoading(false)
     }
   }
 
-  // 🔵 (임시) 이미지 생성 API
-  const generateFakeImage = async (prompt: string) => {
+  // 이미지 생성 API 호출
+  const generateImage = async (prompt: string) => {
     console.log("🖼️ 생성 프롬프트:", prompt)
 
     try {
       const response = await fetch("http://localhost:8000/generate-image", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ prompt }),
       })
 
       const data = await response.json()
       return data.image_url
     } catch (error) {
-      console.error("❌ 이미지 생성 실패:", error)
+      console.error("❌ 이미지 생성 오류:", error)
       return "/icons/images.jpg"
     }
   }
@@ -170,22 +168,13 @@ export default function RoomieChat() {
       {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-          >
+          <div key={idx} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
             {msg.type === "image" ? (
-              <img
-                src={msg.src}
-                alt="매물 이미지"
-                className="rounded-lg shadow w-64 h-40 object-cover"
-              />
+              <img src={msg.src} alt="매물 이미지" className="rounded-lg shadow w-64 h-40 object-cover" />
             ) : (
               <div
                 className={`p-3 rounded-2xl max-w-[70%] text-sm ${
-                  msg.sender === "user"
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-800 border"
+                  msg.sender === "user" ? "bg-blue-500 text-white" : "bg-white text-gray-800 border"
                 }`}
               >
                 {msg.text}
