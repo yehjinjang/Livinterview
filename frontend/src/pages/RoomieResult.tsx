@@ -10,6 +10,15 @@ export default function RoomieResult() {
   const defaultOriginal = "/icons/images.jpg"
   const defaultGenerated = "/icons/generate-image.png"
 
+  const downloadImage = (url: string, filename: string) => {
+    const link = document.createElement("a")
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <div className="flex-1 overflow-y-auto p-6 flex flex-col space-y-6">
@@ -41,6 +50,12 @@ export default function RoomieResult() {
             className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-full text-sm"
           >
             홈으로 가기
+          </button>
+          <button
+            onClick={() => downloadImage(generatedImage || defaultGenerated, "roomie-interior.png")}
+            className="px-4 py-2 bg-zipup-600 hover:bg-blue-700 text-white rounded-full text-sm"
+          >
+            다운로드
           </button>
         </div>
       </div>
