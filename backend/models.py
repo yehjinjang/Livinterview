@@ -6,7 +6,7 @@ from sqlalchemy import (
     ForeignKey,
     TIMESTAMP,
     SmallInteger,
-    DATE,
+    DECIMAL,
     TEXT,
     Float,
     JSON,
@@ -41,11 +41,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     email = Column(String(100), nullable=False)
-    phone = Column(String(11))
-    birth = Column(DATE)
-    gender = Column(Enum(GenderEnum), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    modified_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     expired_at = Column(TIMESTAMP, nullable=True)
     state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
     homie_histories = relationship("HomieHistory", back_populates="user")
@@ -107,7 +103,7 @@ class HomieAnswer(Base):
     __tablename__ = "Homie_answers"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    homie_questions_id = Column(
+    homie_question_id = Column(
         Integer, ForeignKey("Homie_questions.id"), nullable=False
     )
     content = Column(String(50), nullable=False)
@@ -140,7 +136,7 @@ class HomieHistory(Base):
     __tablename__ = "Homie_histories"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    users_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     user = relationship("User", back_populates="homie_histories")
     homie_qna_histories = relationship(
@@ -164,14 +160,55 @@ class HomieQnAHistory(Base):
     __tablename__ = "Homie_qna_histories"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    homie_histories_id = Column(
-        Integer, ForeignKey("Homie_histories.id"), nullable=False
-    )
-    homie_questions_id = Column(
+    homie_history_id = Column(Integer, ForeignKey("Homie_histories.id"), nullable=False)
+    homie_question_id = Column(
         Integer, ForeignKey("Homie_questions.id"), nullable=False
     )
-    homie_answers_id = Column(Integer, ForeignKey("Homie_answers.id"), nullable=False)
+    homie_answer_id = Column(Integer, ForeignKey("Homie_answers.id"), nullable=False)
     homie_history = relationship("HomieHistory", back_populates="homie_qna_histories")
+
+    def __repr__(self):
+        cols = [
+            f"{column.name}={getattr(self, column.name)}"
+            for column in self.__table__.columns
+        ]
+        return f"<{self.__class__.__name__}({', '.join(cols)})>"
+
+    def to_dict(self):
+        return {
+            column.name: getattr(self, column.name) for column in self.__table__.columns
+        }
+
+
+class HomieDongs(Base):
+    __tablename__ = "Homie_dongs"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    district = Column(String(4), nullable=False)
+    dong = Column(String(6), nullable=False)
+    homie_dong_coefficients = relationship(
+        "HomieDongCoefficients", back_populates="homie_dong"
+    )
+
+    def __repr__(self):
+        cols = [
+            f"{column.name}={getattr(self, column.name)}"
+            for column in self.__table__.columns
+        ]
+        return f"<{self.__class__.__name__}({', '.join(cols)})>"
+
+    def to_dict(self):
+        return {
+            column.name: getattr(self, column.name) for column in self.__table__.columns
+        }
+
+
+class HomieDongCoefficients(Base):
+    __tablename__ = "Homie_dong_coefficients"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    homie_dong_id = Column(Integer, ForeignKey("Homie_dongs.id"), nullable=False)
+    sub_category = Column(String(30), nullable=False)
+    coefficient = Column(DECIMAL(6, 5), nullable=False)
+    homie_dong = relationship("HomieDongs", back_populates="homie_dong_coefficients")
 
     def __repr__(self):
         cols = [
@@ -202,17 +239,17 @@ class SeoulDongCode(Base):
 class SeoulRoom(Base):
     __tablename__ = "Seoul_rooms"
 
-    id = Column(Integer, primary_key=True, autoincrement=True) 
+    id = Column(Integer, primary_key=True, autoincrement=True)
     dong_code = Column(String(20))
     gu_name = Column(String(20))
     dong_name = Column(String(20))
     seq = Column(Integer)
-    room_type = Column(String(50))           
-    room_title = Column(String(255))        
+    room_type = Column(String(50))
+    room_title = Column(String(255))
     room_desc = Column(TEXT)
-    price_type = Column(String(20)) 
-    price_info = Column(String(50)) 
-    img_url_list = Column(JSON) 
+    price_type = Column(String(20))
+    price_info = Column(String(50))
+    img_url_list = Column(JSON)
     lat = Column(Float)
     lng = Column(Float)
     floor = Column(String(20))
