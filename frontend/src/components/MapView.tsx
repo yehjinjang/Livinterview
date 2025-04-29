@@ -1,59 +1,76 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
-import "leaflet/dist/leaflet.css"
+import { useEffect, useRef } from "react"
 import { Room } from "../types/room"
-import L from "leaflet"
 
-// 마커 아이콘 fix (기본 마커 오류 해결용) 예시 -> 지도 뭐쓸지도 아직잘모르게씀
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png"
-import markerIcon from "leaflet/dist/images/marker-icon.png"
-import markerShadow from "leaflet/dist/images/marker-shadow.png"
+declare global {
+  interface Window {
+    kakao: any
+  }
+}
 
-delete (L.Icon.Default.prototype as any)._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-})
-// mockdata ->DB로 대체예정
-const dummyRooms: Room[] = [
-  {
-    id: "1",
-    title: "깔끔한 원룸",
-    address: "서울시 강남구",
-    lat: 37.4979,
-    lng: 127.0276,
-    price: 95,
-    size: 12,
-  },
-  {
-    id: "2",
-    title: "넓은 투룸",
-    address: "서울시 마포구",
-    lat: 37.5565,
-    lng: 126.9229,
-    price: 130,
-    size: 20,
-  },
-]
+interface MapViewProps {
+  onPinClick: (room: Room) => void
+}
 
-export default function MapView({ onPinClick }: { onPinClick: (room: Room) => void }) {
-  return (
-    <MapContainer center={[37.541, 126.986]} zoom={12} className="w-full h-full z-0">
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
-      />
-      {dummyRooms.map((room) => (
-        <Marker
-          key={room.id}
-          position={[room.lat, room.lng]}
-          eventHandlers={{
-            click: () => onPinClick(room),
-          }}
-        >
-          <Popup>{room.title}</Popup>
-        </Marker>
-      ))}
-    </MapContainer>
-  )
+export default function MapView({ onPinClick }: MapViewProps) {
+  const mapRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // 이미 로드되어 있으면 바로 실행
+    if (window.kakao && window.kakao.maps && mapRef.current) {
+      initMap()
+      return
+    }
+
+    // 스크립트 동적으로 삽입
+    const script = document.createElement("script")
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_API_KEY}&autoload=false&libraries=services`
+    script.async = true
+    document.head.appendChild(script)
+
+    script.onload = () => {
+      if (!window.kakao || !window.kakao.maps || !mapRef.current) {
+        console.error("❌ Kakao SDK 로드 실패")
+        return
+      }
+
+      window.kakao.maps.load(() => {
+        initMap()
+      })
+    }
+
+    return () => {
+      document.head.removeChild(script)
+    }
+  }, [])
+
+  const initMap = () => {
+    if (!mapRef.current) return
+
+    const map = new window.kakao.maps.Map(mapRef.current, {
+      center: new window.kakao.maps.LatLng(37.5665, 126.978),
+      level: 5,
+    })
+
+    const sampleRoom: Room = {
+      id: "1",
+      title: "예시 원룸",
+      address: "서울시 중구 세종대로",
+      lat: 37.5665,
+      lng: 126.978,
+      price: "1억",
+      size: 18,
+      imageUrl: "",
+    }
+
+    const marker = new window.kakao.maps.Marker({
+      position: new window.kakao.maps.LatLng(sampleRoom.lat, sampleRoom.lng),
+      map,
+    })
+
+    window.kakao.maps.event.addListener(marker, "click", () => {
+      onPinClick(sampleRoom)
+    })
+  }
+
+  return <div ref={mapRef} className="w-full h-full bg-gray-100" />
 }
