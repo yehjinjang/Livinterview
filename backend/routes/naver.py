@@ -1,25 +1,39 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from core.config import NAVER_CLIENT_ID, NAVER_CLIENT_SECRET
-import httpx, logging
+import httpx, logging, os
+
+os.environ.pop("SSL_CERT_FILE", None)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 @router.get("")
 async def login_naver(request: Request):
-    redirect_uri = request.url_for("auth_naver_callback")
+    redirect_uri = "http://localhost:8000/auth/naver/callback"
     state = "randomstate123"
-    return RedirectResponse(
-        f"https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id={NAVER_CLIENT_ID}&redirect_uri={redirect_uri}&state={state}"
+
+    login_url = (
+        f"https://nid.naver.com/oauth2.0/authorize"
+        f"?response_type=code"
+        f"&client_id={NAVER_CLIENT_ID}"
+        f"&redirect_uri={redirect_uri}"
+        f"&state={state}"
     )
 
-@router.get("/callback")
+    print("🔗 Naver login URL:", login_url)
+    return RedirectResponse(login_url)
+
+@router.get("/callback", name="auth_naver_callback")
 async def auth_naver_callback(request: Request):
+    # print("----- 콜백 함수 호출됨!!!!------")  
     try:
         code = request.query_params.get("code")
         state = request.query_params.get("state")
-        redirect_uri = request.url_for("auth_naver_callback")
+        print("Code:", code)
+        print("State:", state)
+
+        redirect_uri = "http://localhost:8000/auth/naver/callback"
         async with httpx.AsyncClient() as client:
             token_res = await client.post(
                 "https://nid.naver.com/oauth2.0/token",
@@ -31,6 +45,7 @@ async def auth_naver_callback(request: Request):
                     "state": state
                 }
             )
+
             token = token_res.json()
             access_token = token["access_token"]
             user_res = await client.get(
@@ -39,7 +54,9 @@ async def auth_naver_callback(request: Request):
             )
             user = user_res.json()["response"]
             request.session['user'] = user
-            return RedirectResponse("http://localhost:5173/survey")
+            # print("네이버 사용자 정보:", user)
+
+            return RedirectResponse("http://localhost:5173/roomie")
     except Exception as e:
         logger.error(f"Naver Login Error: {e}")
         return JSONResponse(status_code=500, content={"detail": "Naver login failed"})

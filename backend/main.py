@@ -6,12 +6,19 @@ from routes.google import router as google_router
 from routes.kakao import router as kakao_router
 from routes.naver import router as naver_router
 from routes.user import router as user_router
+from routes.chat import router as chat_router
+from routes.analyze import router as analyze_router  
+from routes.vision_analyze import router as vision_router
+from routes.generate import router as generate_router
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:4173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,4 +30,8 @@ app.include_router(google_router, prefix="/auth/google", tags=["Google"])
 app.include_router(kakao_router, prefix="/auth/kakao", tags=["Kakao"])
 app.include_router(naver_router, prefix="/auth/naver", tags=["Naver"])
 app.include_router(user_router, tags=["User"])
+app.include_router(chat_router,  tags=["Chat"])
+app.include_router(analyze_router, prefix="/analyze", tags=["Analyze"])  
+app.include_router(vision_router, tags=["VisionAnalyze"])
+app.include_router(generate_router, tags=["Generate"])
 
