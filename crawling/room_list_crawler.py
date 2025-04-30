@@ -111,9 +111,13 @@ def df_to_seoulroom_records(df):
     return mapped_records
 
 
-# ───── 메인 크롤링 함수 ─────
-# 함수명 + CSV 제거 + DB 저장 로직으로 변경
+# ───── 메인 크롤링 함수 (DataFrame 반환용) ─────
 def crawl_all_dongs():
+    """
+    서울시 법정동 코드 리스트를 바탕으로
+    다방 API에서 원룸/투룸 매물 데이터를 크롤링한 뒤,
+    전처리된 pandas DataFrame을 반환합니다.
+    """
     session = SessionLocal()
     dong_df = pd.read_sql("SELECT * FROM Seoul_dong_codes", session.bind)
     dong_df["code"] = dong_df["code"].astype(str)
@@ -182,25 +186,14 @@ def crawl_all_dongs():
 
         all_rows.extend(rows)
 
+    session.close()
+
     if all_rows:
         df = pd.DataFrame(all_rows)
         df[["floor", "area_m2", "maintenance_fee"]] = df["roomDesc"].apply(parse_room_desc)
         df = df[["dong_code", "gu_name", "dong_name"] + KEEP_COLS + ["lat", "lng", "floor", "area_m2", "maintenance_fee"]]
-
-        # ORM 기반 DB 저장
-        try:
-            records = df_to_seoulroom_records(df)  # 수동 맵핑 적용
-            session.bulk_insert_mappings(SeoulRoom, records)
-            session.commit()
-            print("✅ DB 저장 완료 → seoul_rooms 테이블")
-
-        except Exception as e:
-            session.rollback()
-            print(f"⛔ 저장 실패: {e}")
-        finally:
-            session.close()
+        return df
     else:
         print("⛔ 저장할 데이터가 없습니다.")
+        return pd.DataFrame()
 
-if __name__ == "__main__":
-    crawl_all_dongs()
