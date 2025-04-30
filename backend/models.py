@@ -266,6 +266,7 @@ class SeoulRoom(Base):
     floor = Column(String(20))
     area_m2 = Column(Float)
     maintenance_fee = Column(Integer)
+    created_at = Column(TIMESTAMP, server_default=func.now())
 
     def __repr__(self):
         cols = [
