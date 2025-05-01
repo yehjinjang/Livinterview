@@ -30,9 +30,9 @@ class StateEnum(enum.Enum):
 
 
 class TypeEnum(enum.Enum):
-    select = "select"
     radio = "radio"
-    text = "text"
+    range = "range"
+    autocomplete = "autocomplete"
 
 
 class User(Base):
@@ -267,7 +267,6 @@ class SeoulRoom(Base):
     area_m2 = Column(Float)
     maintenance_fee = Column(Integer)
     created_at = Column(TIMESTAMP, server_default=func.now())
-
 
     def __repr__(self):
         cols = [
