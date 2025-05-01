@@ -1,4 +1,4 @@
-from run import create_removal_mask 
+from masking.run import create_removal_mask 
 
 if __name__ == "__main__":
     import argparse
@@ -15,4 +15,4 @@ if __name__ == "__main__":
     parser.add_argument("--device", type=str, default="cuda")
     args = parser.parse_args()
 
-    run_demo(args)
+    create_removal_mask(args)

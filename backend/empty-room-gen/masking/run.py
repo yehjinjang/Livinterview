@@ -5,13 +5,19 @@ from PIL import Image
 import torch
 import torchvision.transforms as TS
 from segment_anything import build_sam, SamPredictor
-from Tag2Text.models import tag2text
-from Tag2Text import inference_ram
 
-from modules.loader import load_image, load_model_gdino
-from modules.predictor import get_grounding_output, get_sam_masks
-from modules.mask_handler import save_and_merge_masks
-from modules.utils import normalize, is_must_keep
+import sys
+
+# Tag2Text 모듈을 로컬 경로로 추가
+sys.path.append(os.path.join(os.path.dirname(__file__), "Tag2Text"))
+from models import tag2text
+import inference_ram
+
+# 나머지 masking 모듈
+from masking.modules.loader import load_image, load_model_gdino
+from masking.modules.predictor import get_grounding_output, get_sam_masks
+from masking.modules.mask_handler import save_and_merge_masks
+from masking.modules.utils import normalize, is_must_keep
 
 def create_removal_mask(args):
     device = args.device
