@@ -135,7 +135,7 @@ export default function RoomieChat() {
 
       const generatedImageUrl = await generateImage(promptData.result)
 
-      navigate("/roomie-result", {
+      navigate("/roomie/result", {
         state: { originalImage: imageUrl, generatedImage: generatedImageUrl, title }
       })
     } catch {
