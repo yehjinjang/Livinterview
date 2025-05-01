@@ -32,6 +32,7 @@ class StateEnum(enum.Enum):
 class TypeEnum(enum.Enum):
     radio = "radio"
     range = "range"
+    select = "select"
     autocomplete = "autocomplete"
 
 
@@ -73,6 +74,8 @@ class HomieQuestion(Base):
     sub_category = Column(String(10), nullable=False)
     content = Column(String(50), nullable=False)
     input_type = Column(Enum(TypeEnum), nullable=False)
+    min = Column(SmallInteger, nullable=True)
+    max = Column(SmallInteger, nullable=True)
     icon_path = Column(String(100))
     code = Column(SmallInteger, nullable=False)
     state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
