@@ -1,7 +1,9 @@
+@import "leaflet/dist/leaflet.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "leaflet/dist/leaflet.css";
+
+/* Pretendard 웹폰트 설정 */
 @font-face {
     font-family: 'Pretendard-Regular';
     src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
@@ -11,3 +13,13 @@
 /* *{
     font-family: 'Pretendard-Regular', sans-serif;
 } */
+
+  .pdf-page {
+    width: 794px;           /* A4 width @ 96dpi */
+    min-height: 1123px;     /* A4 height @ 96dpi */
+    padding: 40px;
+    background: white;
+    margin-bottom: 0;       /* 마지막 여백 없애기 */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    page-break-inside: avoid; /* 페이지 분할 방지 */
+  }
