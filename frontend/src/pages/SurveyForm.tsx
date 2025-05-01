@@ -24,6 +24,7 @@ function SurveyForm() {
 
   // 현재 질문 데이터
   const current = questions[index];
+  const navigate = useNavigate();
 
   if (!current) {
     return (
@@ -32,8 +33,6 @@ function SurveyForm() {
       </div>
     );
   }
-
-  const navigate = useNavigate();
 
   // 다음 질문 or 완료 처리
   const handleAnswer = (value: any) => {
@@ -51,21 +50,26 @@ function SurveyForm() {
     setAnswers((prev) =>
       typeof value === "object"
         ? { ...prev, ...value }
-        : { ...prev, [current.id]: value }
+        : { ...prev, [current.sub_category]: value }
     );
 
     // 다음 질문 or 완료 처리
     if (index < questions.length - 1) {
       setIndex((i) => i + 1);
     } else {
-      navigate("/report", { state: { answers } });
+      const finalAnswer =
+        typeof value === "object"
+          ? { ...answers, ...value }
+          : { ...answers, [current.sub_category]: value };
+
+      navigate("/report", { state: { answers: finalAnswer } });
     }
   };
 
   // 🔙 이전 질문으로 이동
   const handlePrev = () => {
     if (index > 0) {
-      const prevId = questions[index].id;
+      const prevId = questions[index].sub_category;
       setAnswers((prev) => {
         const copy = { ...prev };
         delete copy[prevId];
@@ -110,7 +114,10 @@ function SurveyForm() {
         )}
 
         {/* 질문 유형별 렌더링 (버튼/셀렉트/입력 등) */}
-        <div key={current.id} className="animate-fade-in duration-500">
+        <div
+          key={current.sub_category}
+          className="animate-fade-in duration-500"
+        >
           <SurveyRenderer question={current} onAnswer={handleAnswer} />
         </div>
       </div>

@@ -8,14 +8,17 @@ export type QuestionType =
   | "autocomplete";
 
 export interface Question {
-  id: string;
+  // id: string;
   main_category: string;
   sub_category: string;
   content: string;
   input_type: QuestionType;
-  answers?: string[];
-  code?: number;
-  multi?: boolean;
+  min?: number;
+  max?: number;
   icon_path?: string;
-  rangeIds?: [string];
+  code?: number;
+  answers?: {
+    content: string;
+    score: number;
+  }[];
 }
