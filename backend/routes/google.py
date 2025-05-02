@@ -20,7 +20,7 @@ oauth.register(
 
 @router.get("")
 async def login_google(request: Request):
-    redirect_uri = "http://127.0.0.1:8000/auth/google/callback"
+    redirect_uri = "http://localhost:8000/auth/google/callback"
     # print(" Google Login URL 생성")
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
@@ -30,9 +30,13 @@ async def auth_google_callback(request: Request):
         # print("Google 콜백 호출됨")
         token = await oauth.google.authorize_access_token(request)
         user = token.get("userinfo")
-        print("Token:", token)
-        print("User Info:", user)
+        user = {
+            'email':user.get('email'),
+            'name':user.get('name')
+        }
+        # print("User Info:", user)
         request.session['user'] = user
+        # print(request.session.get('user'))
         return RedirectResponse("http://localhost:5173/roomie")
     except Exception as e:
         logger.error(f"Google Login Error: {e}")
