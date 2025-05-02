@@ -11,7 +11,7 @@ from routes.analyze import router as analyze_router
 from routes.vision_analyze import router as vision_router
 from routes.generate import router as generate_router
 from routes.data import router as data_router
-from routes.roomie import router as roomie_router
+#from routes.roomie import router as roomie_router
 
 
 app = FastAPI()
@@ -38,4 +38,4 @@ app.include_router(chat_router, tags=["Chat"])
 app.include_router(analyze_router, prefix="/analyze", tags=["Analyze"])
 app.include_router(vision_router, tags=["VisionAnalyze"])
 app.include_router(generate_router, tags=["Generate"])
-app.include_router(roomie_router, prefix="/api",tags=["Roomie"])
+#app.include_router(roomie_router, prefix="/api",tags=["Roomie"])

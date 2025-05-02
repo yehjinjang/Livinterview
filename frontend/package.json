@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "framer-motion": "^12.7.4",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.501.0",
     "react": "^19.0.0",
