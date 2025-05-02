@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 @router.get("")
 async def login_kakao(request: Request):
-    redirect_uri = "http://127.0.0.1:8000/auth/kakao/callback"
+    redirect_uri = "http://localhost:8000/auth/kakao/callback"
     login_url = (
         f"https://kauth.kakao.com/oauth/authorize?"
         f"response_type=code&client_id={KAKAO_REST_API_KEY}&redirect_uri={redirect_uri}"
@@ -22,7 +22,7 @@ async def auth_kakao_callback(request: Request):
     try:
         code = request.query_params.get("code")
         print("Code:", code)
-        redirect_uri = "http://127.0.0.1:8000/auth/kakao/callback"
+        redirect_uri = "http://localhost:8000/auth/kakao/callback"
         
         async with httpx.AsyncClient() as client:
             token_res = await client.post(

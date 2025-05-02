@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 006308a9a5ff
+Revision ID: ee2ca7648757
 Revises: 
-Create Date: 2025-04-29 16:54:13.622937
+Create Date: 2025-05-01 14:56:19.597402
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '006308a9a5ff'
+revision: str = 'ee2ca7648757'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -32,7 +32,9 @@ def upgrade() -> None:
     sa.Column('main_category', sa.String(length=10), nullable=False),
     sa.Column('sub_category', sa.String(length=10), nullable=False),
     sa.Column('content', sa.String(length=50), nullable=False),
-    sa.Column('input_type', sa.Enum('select', 'radio', 'text', name='typeenum'), nullable=False),
+    sa.Column('input_type', sa.Enum('radio', 'range', 'select', 'autocomplete', name='typeenum'), nullable=False),
+    sa.Column('min', sa.SmallInteger(), nullable=True),
+    sa.Column('max', sa.SmallInteger(), nullable=True),
     sa.Column('icon_path', sa.String(length=100), nullable=True),
     sa.Column('code', sa.SmallInteger(), nullable=False),
     sa.Column('state', sa.Enum('active', 'inactive', name='stateenum'), server_default=sa.text("'active'"), nullable=True),
@@ -65,6 +67,7 @@ def upgrade() -> None:
     sa.Column('floor', sa.String(length=20), nullable=True),
     sa.Column('area_m2', sa.Float(), nullable=True),
     sa.Column('maintenance_fee', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('Subway_stations',
