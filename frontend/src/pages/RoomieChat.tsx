@@ -88,16 +88,17 @@ export default function RoomieChat() {
 
   
 
-  /* 채팅 스크롤 & 자동 전환 */
-  useEffect(() => {
-    if (!messages.length) return;
+/* 채팅 스크롤 & 자동 전환 */
+useEffect(() => {
+  if (!messages.length && !typingText) return;
 
-    const last = messages[messages.length - 1];
-    if (last.sender === "bot" && last.text?.includes("좋아! 이대로 방을 꾸며볼게"))
-      generateImageAndNavigate(summaryText); // summaryText 가 null 이면 재검사
+  const last = messages[messages.length - 1];
+  if (last?.sender === "bot" && last.text?.includes("좋아! 이대로 방을 꾸며볼게"))
+    generateImageAndNavigate(summaryText); // summaryText가 null이면 재검사
 
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages, typingText]);
+
 
   /* 사용자 메시지 → /chat */
   const sendMessage = async () => {
@@ -203,7 +204,7 @@ export default function RoomieChat() {
   };
 
   /* ───────── UI ───────── */
-  if (isAnalyzing) return <LoadingSpinner text="방 분석 중...잠시만 기다려주세요!" />;
+  if (isAnalyzing) return <LoadingSpinner text="방 분석 중... 잠시만 기다려주세요!" />;
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
