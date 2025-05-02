@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from core.config import SESSION_SECRET_KEY
+from core.config import SESSION_SECRET_KEY, SESSION_COOKIE
 from routes.google import router as google_router
 from routes.kakao import router as kakao_router
 from routes.naver import router as naver_router
@@ -11,10 +11,17 @@ from routes.analyze import router as analyze_router
 from routes.vision_analyze import router as vision_router
 from routes.generate import router as generate_router
 from routes.data import router as data_router
-from routes.roomie import router as roomie_router
+
+# from routes.roomie import router as roomie_router
 
 
 app = FastAPI()
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET_KEY,
+    session_cookie=SESSION_COOKIE,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,7 +34,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET_KEY)
 
 app.include_router(google_router, prefix="/auth/google", tags=["Google"])
 app.include_router(kakao_router, prefix="/auth/kakao", tags=["Kakao"])
@@ -38,4 +44,4 @@ app.include_router(chat_router, tags=["Chat"])
 app.include_router(analyze_router, prefix="/analyze", tags=["Analyze"])
 app.include_router(vision_router, tags=["VisionAnalyze"])
 app.include_router(generate_router, tags=["Generate"])
-app.include_router(roomie_router, prefix="/api",tags=["Roomie"])
+# app.include_router(roomie_router, prefix="/api",tags=["Roomie"])
