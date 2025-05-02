@@ -14,12 +14,13 @@
     font-family: 'Pretendard-Regular', sans-serif;
 } */
 
+
   .pdf-page {
-    width: 794px;           /* A4 width @ 96dpi */
-    min-height: 1123px;     /* A4 height @ 96dpi */
-    padding: 40px;
+    width: 794px;         /* A4 width @ 96dpi */
+    min-height: 1123px;   /* A4 height @ 96dpi */
+    padding: 0px;  /* 여백 제거 */
+    margin: 0;
     background: white;
-    margin-bottom: 0;       /* 마지막 여백 없애기 */
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
     page-break-inside: avoid; /* 페이지 분할 방지 */
   }
