@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
+
 @router.get("/me")
 async def get_user(request: Request):
     raw_user = request.session.get("user")
@@ -29,7 +30,10 @@ async def get_user(request: Request):
         email = raw_user.get("email")
         name = raw_user.get("name")
 
-    return {
-        "email": email,
-        "name": name
-    }
+    return {"email": email, "name": name}
+
+
+@router.post("/logout")
+async def logout(request: Request):
+    request.session.clear()
+    return JSONResponse({"message": "Logged out"})
