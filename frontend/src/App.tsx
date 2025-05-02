@@ -13,13 +13,13 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/roomie" element={<RoomieHome />} />
         <Route path="/home" element={<Home />} />
         <Route path="/survey" element={<SurveyForm />} />
         <Route path="/report" element={<Report />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/interior" element={<RoomieChat />} />
-        <Route path="/roomie-result" element={<RoomieResult />} />
+        <Route path="/profile" element={<ProfilePage />} /> 
+        <Route path="/roomie" element={<RoomieHome />} /> 
+        <Route path="/roomie/interior" element ={<RoomieChat />} />
+        <Route path="/roomie/result" element={<RoomieResult />} />
       </Routes>
     </BrowserRouter>
   );
