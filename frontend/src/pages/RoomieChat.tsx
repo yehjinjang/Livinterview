@@ -1,167 +1,201 @@
-import { useLocation, useNavigate } from "react-router-dom"
-import { useEffect, useState, useRef } from "react"
-import ChatMessageList from "../components/ChatMessageList"
-import MessageInput from "../components/MessageInput"
-import TypingBubble from "../components/TypingBubble"
-import LoadingSpinner from "../components/LoadingSpinner"
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import ChatMessageList from "../components/ChatMessageList";
+import MessageInput from "../components/MessageInput";
+import TypingBubble from "../components/TypingBubble";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 interface ChatMessage {
-  type: "text" | "image"
-  text?: string
-  src?: string
-  sender: "user" | "bot"
+  type: "text" | "image";
+  text?: string;
+  src?: string;
+  sender: "user" | "bot";
 }
 
+/* fetch(url) → File 객체로 변환 */
+const urlToFile = async (url: string): Promise<File> => {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  const ext = blob.type.split("/")[1] || "png";
+  return new File([blob], `upload.${ext}`, { type: blob.type });
+};
+
 export default function RoomieChat() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { imageUrl, title } = location.state || {}
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const { imageUrl, title } = state || {};
 
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [input, setInput] = useState<string>("")
-  const [typingText, setTypingText] = useState<string>("")
-  const [isSending, setIsSending] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [isAnalyzing, setIsAnalyzing] = useState(true)
-  const bottomRef = useRef<HTMLDivElement>(null)
+  /* ───────── state ───────── */
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [typingText, setTypingText] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(true);
+  const [summaryText, setSummaryText] = useState<string | null>(null); // ★ 요약 저장
 
-  const analyzeImage = async (url: string) => {
-    try {
-      const res = await fetch(url)
-      const blob = await res.blob()
-      const formData = new FormData()
-      formData.append("image", new File([blob], "room.jpg"))
-      const response = await fetch("http://localhost:8000/analyze-image", {
-        method: "POST",
-        body: formData,
-      })
-      const data = await response.json()
-      return data.description
-    } catch {
-      return "방 사진 분석 실패"
-    }
-  }
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const didInit = useRef(false);
 
+  /* 이미지 분석 */
   useEffect(() => {
-    const init = async () => {
-      if (imageUrl) {
-        const description = await analyzeImage(imageUrl)
+    if (!imageUrl || didInit.current) return;
+    didInit.current = true;
+
+    (async () => {
+      try {
+        const form = new FormData();
+        form.append("image", await urlToFile(imageUrl));
+
+        const res = await fetch("http://localhost:8000/vision/analyze-image", {
+          method: "POST",
+          body: form,
+        });
+        if (!res.body) throw new Error("스트림 없음");
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let full = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          full += chunk;
+          if (chunk.includes("__END__STREAM__")) break;
+          setTypingText(prev => prev + chunk);
+        }
+
+        const clean = full.replace("__END__STREAM__", "").trim();
         setMessages([
           { type: "image", src: imageUrl, sender: "bot" },
-          { type: "text", text: "나는 너의 인테리어 도우미 Roomie야!", sender: "bot" },
-          { type: "text", text: `이 방은 ${description} 어떤 스타일로 꾸미고 싶어?`, sender: "bot" },
-        ])
-        setIsAnalyzing(false)
+          { type: "text", text: clean, sender: "bot" },
+        ]);
+      } catch {
+        setMessages([{ type: "text", text: "초기 분석 실패", sender: "bot" }]);
+      } finally {
+        setTypingText("");
+        setIsAnalyzing(false);
       }
-    }
-    init()
-  }, [imageUrl])
+    })();
+  }, [imageUrl]);
 
+  /* 채팅 스크롤 & 자동 전환 */
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages, typingText])
+    if (!messages.length) return;
 
+    const last = messages[messages.length - 1];
+    if (last.sender === "bot" && last.text?.includes("좋아! 이대로 방을 꾸며볼게"))
+      generateImageAndNavigate(summaryText); // summaryText 가 null 이면 재검사
+
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  /* 사용자 메시지 → /chat */
   const sendMessage = async () => {
-    if (!input.trim() || isSending || isGenerating) return
+    if (!input.trim() || isSending || isGenerating) return;
+    const userMsg = input.trim();
 
-    const userMessage = input.trim()
-    setMessages(prev => [...prev, { type: "text", text: userMessage, sender: "user" }])
-    setInput("")
-    setIsSending(true)
+    setMessages(prev => [...prev, { type: "text", text: userMsg, sender: "user" }]);
+    setInput("");
+    setIsSending(true);
+    setTypingText("");
+
+    /* “응” → 바로 이미지 생성 */
+    if (summaryText && ["응", "yes", "네"].includes(userMsg.toLowerCase())) {
+      await generateImageAndNavigate(summaryText);
+      setIsSending(false);
+      return;
+    }
 
     try {
-      const formattedMessages = messages.map(m =>
-        m.type === "image"
-          ? { role: "assistant", content: `방 사진이 있어: ${m.src}` }
-          : { role: m.sender === "user" ? "user" : "assistant", content: m.text || "" }
-      )
-      formattedMessages.push({ role: "user", content: userMessage })
-
-      const response = await fetch("http://localhost:8000/chat", {
+      const res = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: formattedMessages }),
-      })
+        body: JSON.stringify({ user_input: userMsg }),
+      });
+      if (!res.body) throw new Error();
 
-      const data = await response.json()
-      typeWriterEffect(data.reply)
-    } catch {
-      setMessages(prev => [...prev, { type: "text", text: "서버 오류", sender: "bot" }])
-      setIsSending(false)
-    }
-  }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let full = "";
 
-  const typeWriterEffect = (fullText: string) => {
-    setTypingText("")
-    let index = 0
-    const typing = () => {
-      if (index < fullText.length) {
-        setTypingText(prev => prev + fullText[index])
-        index++
-        setTimeout(typing, 30)
-      } else {
-        setMessages(prev => [...prev, { type: "text", text: fullText, sender: "bot" }])
-        setTypingText("")
-        setIsSending(false)
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        full += chunk;
+        if (chunk.includes("__END__STREAM__")) break;
+        setTypingText(prev => prev + chunk);
       }
-    }
-    typing()
-  }
 
+      const clean = full.replace("__END__STREAM__", "").trim();
+      setMessages(prev => [...prev, { type: "text", text: clean, sender: "bot" }]);
+    } catch {
+      setMessages(prev => [...prev, { type: "text", text: "서버 오류", sender: "bot" }]);
+    } finally {
+      setTypingText("");
+      setIsSending(false);
+    }
+  };
+
+  /* 대화 요약 */
   const summarizeAndGenerateImage = async () => {
-    if (isSending || isGenerating) return
-    setIsGenerating(true)
+    if (isSending || isGenerating) return;
+    setIsGenerating(true);
 
     try {
-      setMessages(prev => [...prev, { type: "text", text: "인테리어 생성 중...🔥", sender: "bot" }])
-
-      const conversation = messages.filter(m => m.type === "text")
-        .map(m => `${m.sender === "user" ? "사용자" : "Roomie"}: ${m.text}`)
-        .join("\n")
-
-      const summaryRes = await fetch("http://localhost:8000/analyze/summary", {
+      const res = await fetch("http://localhost:8000/analyze/summarize-memory", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversation }),
-      })
-      const summaryData = await summaryRes.json()
+      });
+      const { result } = await res.json();
 
-      const promptRes = await fetch("http://localhost:8000/analyze/controlnet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ summary: summaryData.result }),
-      })
-      const promptData = await promptRes.json()
+      if (result === "요약할 대화가 없습니다.") {
+        setMessages(prev => [
+          ...prev,
+          { type: "text", text: "아직 인테리어를 하기엔 부족해! 대화를 더 해보자!", sender: "bot" },
+        ]);
+        return;
+      }
 
-      const generatedImageUrl = await generateImage(promptData.result)
-
-      navigate("/roomie-result", {
-        state: { originalImage: imageUrl, generatedImage: generatedImageUrl, title }
-      })
-    } catch {
-      setMessages(prev => [...prev, { type: "text", text: "이미지 생성 실패", sender: "bot" }])
+      /* 요약 저장 + 동의 요청 */
+      setSummaryText(result);
+      setMessages(prev => [
+        ...prev,
+        {
+          type: "text",
+          text: `지금까지 요약이야 👇\n\n${result}\n\n맞으면 "응"이라고 답해줘!`,
+          sender: "bot",
+        },
+      ]);
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
 
-  const generateImage = async (prompt: string) => {
+  /* 이미지 생성 */
+  const generateImageAndNavigate = async (prompt: string | null) => {
+    if (!prompt) return; // 안전 가드
     try {
       const res = await fetch("http://localhost:8000/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
-      })
-      const data = await res.json()
-      return data.image_url
+      });
+      const { image_url } = await res.json();
+      navigate("/roomie-result", {
+        state: { originalImage: imageUrl, generatedImage: image_url, title },
+      });
     } catch {
-      return "/icons/images.jpg"
+      setMessages(prev => [
+        ...prev,
+        { type: "text", text: "이미지 생성 실패 ㅠㅠ 다시 시도해줘.", sender: "bot" },
+      ]);
     }
-  }
+  };
 
-  if (isAnalyzing) {
-    return <LoadingSpinner text="방 분석 중...잠시만 기다려주세요!" />
-  }
+  /* ───────── UI ───────── */
+  if (isAnalyzing) return <LoadingSpinner text="방 분석 중...잠시만 기다려주세요!" />;
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -180,5 +214,5 @@ export default function RoomieChat() {
         summarizeAndGenerateImage={summarizeAndGenerateImage}
       />
     </div>
-  )
+  );
 }

@@ -14,13 +14,24 @@ class GenerateRequest(BaseModel):
 
 @router.post("/generate-image")
 async def generate_image(req: GenerateRequest):
-    response = openai.Image.create(
+    # 1) 프론트가 보낸 summary (한국어)
+    summary = req.prompt.strip()
+
+    # 2) 영어 변환 + 제약 추가
+    base_prompt = controlnet_chain.run({"summary": summary}).strip().strip('"')
+    final_prompt = (
+        base_prompt
+        + " Do not change the room’s layout, dimensions, wallpaper color, "
+          "floor material, or the positions of the windows and doors, "
+          "as they are fixed."
+    )
+
+    # 3) DALL·E 3 호출
+    response = client.images.generate(
         model="dall-e-3",
-        prompt=req.prompt,
+        prompt=final_prompt,
         n=1,
         size="1024x1024",
         quality="standard",
-        response_format="url"
     )
-    image_url = response['data'][0]['url']
-    return {"image_url": image_url}
+    return {"image_url": response.data[0].url}

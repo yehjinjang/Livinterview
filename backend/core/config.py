@@ -1,4 +1,10 @@
 from starlette.config import Config
+from dotenv import load_dotenv
+from pathlib import Path
+
+# .env 위치를 명확히 지정
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 config = Config(".env")
 
