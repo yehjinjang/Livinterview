@@ -44,41 +44,49 @@ export default function RoomieChat() {
 
     (async () => {
       try {
-        const form = new FormData();
-        form.append("image", await urlToFile(imageUrl));
+        // 1. 인삿말 먼저 추가
+        setMessages([
+          { type: "text", text: "안녕! 난 인테리어 도우미 Roomie야 😊", sender: "bot" },
+          { type: "image", src: imageUrl, sender: "bot" },
+        ]);
 
-        const res = await fetch("http://localhost:8000/vision/analyze-image", {
+        setIsAnalyzing(false); // ✅ 바로 채팅 UI 띄움
+
+        const res = await fetch("http://localhost:8000/chat", {
           method: "POST",
-          body: form,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image_url: imageUrl }),
         });
+
         if (!res.body) throw new Error("스트림 없음");
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder("utf-8");
-        let full = "";
+        let typing = "";
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           const chunk = decoder.decode(value, { stream: true });
-          full += chunk;
           if (chunk.includes("__END__STREAM__")) break;
+          typing += chunk;
           setTypingText(prev => prev + chunk);
         }
 
-        const clean = full.replace("__END__STREAM__", "").trim();
-        setMessages([
-          { type: "image", src: imageUrl, sender: "bot" },
-          { type: "text", text: clean, sender: "bot" },
+        // ✅ 스트리밍된 텍스트를 메시지로 추가
+        setMessages(prev => [
+          ...prev,
+          { type: "text", text: typing, sender: "bot" }
         ]);
-      } catch {
-        setMessages([{ type: "text", text: "초기 분석 실패", sender: "bot" }]);
-      } finally {
         setTypingText("");
+      } catch {
+        setMessages([{ type: "text", text: "초기 메시지 실패", sender: "bot" }]);
         setIsAnalyzing(false);
       }
     })();
   }, [imageUrl]);
+
+  
 
   /* 채팅 스크롤 & 자동 전환 */
   useEffect(() => {
@@ -164,7 +172,7 @@ export default function RoomieChat() {
         ...prev,
         {
           type: "text",
-          text: `지금까지 요약이야 👇\n\n${result}\n\n맞으면 "응"이라고 답해줘!`,
+          text: `지금까지 대화한 내용을 정리해봤어!! \n\n${result}\n\n맞으면 "응"이라고 답해줘!`,
           sender: "bot",
         },
       ]);

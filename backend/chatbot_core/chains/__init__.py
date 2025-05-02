@@ -8,3 +8,4 @@ from .controlnet_chain import controlnet_chain
 from .question_check_chain import question_check_chain
 from .furniture_warning_chain import furniture_warning_chain
 from .followup_chain import followup_chain
+from .extract_structure_chain import extract_structure_chain

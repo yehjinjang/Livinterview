@@ -1,6 +1,28 @@
 
 from langchain.prompts import PromptTemplate
 from langchain.prompts import ChatPromptTemplate
+from langchain.schema import SystemMessage, HumanMessage
+
+
+
+system_prompt = SystemMessage(content="""  
+넌 인테리어 전문가이자 챗봇이야. 사용자가 올린 빈 방 사진을 바탕으로, 벽지 색, 바닥 색, 구조를 설명해주고,  
+어울리는 가구나 배치 스타일을 전문가 관점에서 먼저 제안해.  
+  
+**절대 마크다운 형식(번호, 별표, 굵은 글씨 등)을 사용하지 마.**  
+글머리 기호 없이 자연스럽게 문장으로 설명하듯 말해줘.  
+  
+각 응답에서는 가구 추천, 배치 제안, 스타일 제안을 먼저 하고,  
+마무리로는 사용자의 취향이나 의견을 물어봐야 해. 예를 들면:  
+- "이 중에 마음에 드는 가구 있어?"  
+- "혹시 다른 스타일이나 필요한 아이템 있을까?"  
+- "더 자세히 얘기해보고 싶은 부분 있어?"  
+  
+항상 친근하고 자연스러운 반말로, 기계적으로 느껴지지 않게 다양한 표현을 사용해줘.  
+최종 목표는 ControlNet 프롬프트를 만드는 거야.
+""")
+
+
 
 chat_prompt = ChatPromptTemplate.from_messages([
     ("system", """
@@ -118,6 +140,7 @@ summary_prompt = PromptTemplate.from_template("""
 - 사용자가 "조명 좋아", "침대는 괜찮아"처럼 일부만 언급한 경우에는 해당 **부분만 간단히 포함**해줘.
 - GPT가 추가로 제안했지만 사용자가 언급하지 않은 내용은 **절대 포함하지 마**.
 - 사용자가 명확하게 **가구 이름을 직접 언급한 경우에도 포함**해줘 (예: "옷장 필요해", "침대랑 선반", "수납장도 넣어줘")
+- 사용자가 **인테리어 스타일을 직접 제안**한 경우도 포함해줘. (예: "앤틱 스타일", "모던하게", "빈티지 느낌으로")
 
 형식:
 - 사용자에게 직접 말하듯이, 3~5줄 정도의 자연스럽고 친근한 한국어 반말로 정리해줘.
@@ -126,6 +149,21 @@ summary_prompt = PromptTemplate.from_template("""
 
 대화 내용:
 {conversation}
+""")
+
+from langchain.prompts import PromptTemplate
+
+extract_structure_prompt = PromptTemplate.from_template("""
+다음은 인테리어 챗봇의 응답이야. 여기서 방의 **구조, 벽지 색, 바닥 소재/색, 창문 위치** 등  
+**방의 물리적 특성만 묘사한 부분만** 골라줘.
+
+조건:
+- 가구 추천, 스타일 제안, 분위기 설명은 **절대 포함하지 마**.
+- 벽지, 바닥, 창문 위치, 방의 모양 등 **실제 공간 묘사**만 포함해.
+- 한글로, 간결하게 2~4줄로 정리해줘.
+
+GPT 응답:
+{response}
 """)
 
 
