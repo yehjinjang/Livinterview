@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import RangeSlider from "./RangeSlider"
 
 interface FilterCardProps {
@@ -7,13 +7,24 @@ interface FilterCardProps {
 
 export default function FilterCard({ onFilterChange }: FilterCardProps) {
   const [contractType, setContractType] = useState<"월세" | "전세">("월세")
-  const [depositRange, setDepositRange] = useState<[number, number]>([0, 10000])
-  const [monthlyRange, setMonthlyRange] = useState<[number, number]>([0, 500])
+  const [depositRange, setDepositRange] = useState<[number, number]>([0, 12000]) // 월세 기본값
+  const [monthlyRange, setMonthlyRange] = useState<[number, number]>([0, 500])    // 월세 기본값
   const [sizeOption, setSizeOption] = useState<string>("전체")
+
+  // 계약 유형이 바뀔 때 depositRange, monthlyRange 초기화
+  useEffect(() => {
+    if (contractType === "월세") {
+      setDepositRange([0, 12000]) // 월세 보증금 0~1억2천
+      setMonthlyRange([0, 500])   // 월세 0~500만
+    } else if (contractType === "전세") {
+      setDepositRange([0, 100000]) // 전세금 0~10억
+      setMonthlyRange([0, 0])      // 전세는 월세 슬라이더 숨기기용
+    }
+  }, [contractType])
 
   return (
     <div className="absolute top-4 left-4 bg-white rounded-xl shadow-lg p-4 w-[320px] z-50 space-y-5">
-      {/* 계약 형태 */}
+      {/* 거래 유형 선택 */}
       <div>
         <p className="text-sm font-semibold">거래유형</p>
         <div className="flex gap-2 mt-2">
@@ -31,7 +42,7 @@ export default function FilterCard({ onFilterChange }: FilterCardProps) {
         </div>
       </div>
 
-      {/* 면적 옵션 */}
+      {/* 면적 옵션 선택 */}
       <div>
         <p className="text-sm font-semibold">면적 (평)</p>
         <select
@@ -53,21 +64,23 @@ export default function FilterCard({ onFilterChange }: FilterCardProps) {
           <RangeSlider
             label="보증금"
             min={0}
-            max={10000}
+            max={12000}
             step={100}
             unit="만원"
             value={depositRange}
             onChange={setDepositRange}
           />
-          <RangeSlider
-            label="월세"
-            min={0}
-            max={500}
-            step={10}
-            unit="만원"
-            value={monthlyRange}
-            onChange={setMonthlyRange}
-          />
+          {monthlyRange[0] !== monthlyRange[1] && (
+            <RangeSlider
+              label="월세"
+              min={0}
+              max={500}
+              step={10}
+              unit="만원"
+              value={monthlyRange}
+              onChange={setMonthlyRange}
+            />
+          )}
         </>
       )}
 
@@ -75,8 +88,8 @@ export default function FilterCard({ onFilterChange }: FilterCardProps) {
         <RangeSlider
           label="전세금"
           min={0}
-          max={10000}
-          step={100}
+          max={100000}
+          step={500}
           unit="만원"
           value={depositRange}
           onChange={setDepositRange}

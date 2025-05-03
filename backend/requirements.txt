@@ -3,3 +3,9 @@ uvicorn
 authlib
 python-dotenv
 starlette
+openai
+httpx
+itsdangerous
+langchain
+langchain_community
+langchain-openai
