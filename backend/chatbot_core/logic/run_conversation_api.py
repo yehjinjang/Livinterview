@@ -18,12 +18,6 @@ from chatbot_core.logic.common import count_unique_furniture_mentions
 from pathlib import Path
 from langchain.chains import LLMChain
 
-# ControlNet 프롬프트를 txt로 저장하는 함수
-def save_prompt_to_txt(prompt: str, filename: str = "controlnet_prompt.txt"):
-    save_path = Path(__file__).parent / filename
-    with open(save_path, "w", encoding="utf-8") as f:
-        f.write(prompt)
-
 # 안내 문구 스트리밍 출력
 async def stream_fixed_message(text: str, delay: float = 0.03):
     for chunk in text:
@@ -131,7 +125,7 @@ async def run_user_turn(user_input: str):
         if m.type == "human" and not m.content.startswith("[가구 경고]")
     )
 
-    # ✅ dynamic_chat_prompt와 structure_context는 조건문 밖에서 미리 정의
+    # dynamic_chat_prompt와 structure_context는 조건문 밖에서 미리 정의
     structure_context = next(
         (m.content.replace("[방 구조]", "").strip()
          for m in memory.chat_memory.messages if m.content.startswith("[방 구조]")),
@@ -161,9 +155,18 @@ async def run_user_turn(user_input: str):
         ]
 
         if result == "YES":
-            prompt_text = controlnet_chain.run(summary=last_summary).strip().strip('"')
-            final_prompt = prompt_text + " Do not change the room’s layout, dimensions, wallpaper color, floor material, or the positions of the windows and doors, as they are fixed based on the uploaded image."
-            save_prompt_to_txt(final_prompt)
+            # 구조 설명 가져오기
+            structure_context = next(
+                (m.content.replace("[방 구조]", "").strip()
+                for m in memory.chat_memory.messages if m.content.startswith("[방 구조]")),
+                ""
+            )
+
+            # 구조 + 요약 합치기
+            final_summary = f"{structure_context}. {last_summary}" if structure_context else last_summary
+
+            # memory에 저장해둠 (프론트에서 generate-image 호출 시 활용)
+            memory.variables["confirmed_summary"] = final_summary
 
             async for chunk in stream_fixed_message("좋아! 그럼 지금까지 얘기한 걸로 방을 꾸며볼게. 조금만 기다려줘."):
                 yield chunk

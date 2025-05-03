@@ -14,8 +14,8 @@ class GenerateRequest(BaseModel):
 
 @router.post("/generate-image")
 async def generate_image(req: GenerateRequest):
-    # 1) 프론트가 보낸 summary (한국어)
-    summary = req.prompt.strip()
+    # 1) 사용자 동의가 완료된 요약 불러오기
+    summary = memory.variables.get("confirmed_summary")
 
     # 2) 영어 변환 + 제약 추가
     base_prompt = controlnet_chain.run({"summary": summary}).strip().strip('"')
