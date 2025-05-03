@@ -5,7 +5,7 @@ import re
 def count_unique_furniture_mentions(conversation: str) -> int:
     furniture_keywords = [
     "침대", "책상", "의자", "옷장", "선반", "테이블", "소파",
-    "러그", "조명", "커튼", "수납장", "소파", "협탁", "서랍", "거울"
+    "조명", "수납장", "협탁", "서랍", "거울", "작업대", "탁자", "빈백"
 ]
     negative_patterns = ["없어", "필요 없어", "안 써", "제외", "빼줘", "싫어"]
 
