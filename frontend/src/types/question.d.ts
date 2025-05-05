@@ -1,16 +1,24 @@
-export type QuestionType = "radio" | "select" | "slider" | "input" | "checkbox" | "range" | "autocomplete"
+export type QuestionType =
+  | "radio"
+  | "select"
+  | "slider"
+  | "input"
+  | "checkbox"
+  | "range"
+  | "autocomplete";
 
 export interface Question {
-  id: string
-  category: string
-  title: string
-  type: QuestionType
-  options?: string[]
-  min?: number
-  max?: number
-  unit?: string
-  multi?: boolean
-  icon?: string
-  rangeIds?: [string]
-
+  // id: string;
+  main_category: string;
+  sub_category: string;
+  content: string;
+  input_type: QuestionType;
+  min?: number;
+  max?: number;
+  icon_path?: string;
+  code?: number;
+  answers?: {
+    content: string;
+    score: number;
+  }[];
 }
