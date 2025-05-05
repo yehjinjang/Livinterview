@@ -41,4 +41,6 @@ app.include_router(chat_router, tags=["Chat"])
 app.include_router(analyze_router, prefix="/analyze", tags=["Analyze"])
 app.include_router(vision_router, prefix="/vision", tags=["VisionAnalyze"])
 app.include_router(generate_router, tags=["Generate"])
-# app.include_router(roomie_router, prefix="/api", tags=["Roomie"])
+from routes.data import router as data_router
+
+# from routes.roomie import router as roomie_router
