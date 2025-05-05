@@ -10,9 +10,6 @@ from routes.chat import router as chat_router
 from routes.analyze import router as analyze_router
 from routes.vision_analyze import router as vision_router
 from routes.generate import router as generate_router
-from routes.data import router as data_router
-# from routes.roomie import router as roomie_router
-
 from dotenv import load_dotenv
 load_dotenv()
 

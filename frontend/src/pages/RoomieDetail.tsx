@@ -48,7 +48,7 @@ export default function RoomDetail({
         <button
           onClick={() => navigate("/interior", {
             state: {
-              imageUrl: room.imageUrl || "/icons/images.jpg", 
+              imageUrl: room.imageUrl || "https://d1774jszgerdmk.cloudfront.net/1024/lm8eYHMOCkTo_TysRVv38", 
               title: room.title || "방 정보",
             }
           })}
