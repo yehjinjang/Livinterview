@@ -1,5 +1,3 @@
-# insert_rooms.py
-
 import os
 import sys
 import pandas as pd
@@ -82,7 +80,7 @@ def run_insert():
     session.close()
     print(f"✅ 총 {inserted_count}개 매물이 DB에 저장되었습니다. 🕒 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-def schedule_insert(hour="16", minute="40"):
+def schedule_insert(hour="16", minute="10"):
     schedule_time = f"{hour.zfill(2)}:{minute.zfill(2)}"
     print(f"⏰ 매일 {schedule_time}에 자동 저장 작업이 실행됩니다.")
     schedule.every().day.at(schedule_time).do(run_insert)

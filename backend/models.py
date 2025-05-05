@@ -30,9 +30,10 @@ class StateEnum(enum.Enum):
 
 
 class TypeEnum(enum.Enum):
-    select = "select"
     radio = "radio"
-    text = "text"
+    range = "range"
+    select = "select"
+    autocomplete = "autocomplete"
 
 
 class User(Base):
@@ -73,6 +74,8 @@ class HomieQuestion(Base):
     sub_category = Column(String(10), nullable=False)
     content = Column(String(50), nullable=False)
     input_type = Column(Enum(TypeEnum), nullable=False)
+    min = Column(SmallInteger, nullable=True)
+    max = Column(SmallInteger, nullable=True)
     icon_path = Column(String(100))
     code = Column(SmallInteger, nullable=False)
     state = Column(Enum(StateEnum), server_default=expression.text("'active'"))
@@ -267,7 +270,6 @@ class SeoulRoom(Base):
     area_m2 = Column(Float)
     maintenance_fee = Column(Integer)
     created_at = Column(TIMESTAMP, server_default=func.now())
-
 
     def __repr__(self):
         cols = [

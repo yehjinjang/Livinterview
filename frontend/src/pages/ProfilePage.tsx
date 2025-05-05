@@ -1,43 +1,56 @@
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import BottomTabBar from "../components/BottomTabBar"
-import { User, Star, LogOut } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import BottomTabBar from "../components/BottomTabBar";
+import { User, Star, LogOut } from "lucide-react";
 
 export default function ProfilePage() {
-  const [email, setEmail] = useState<string>("")
-  const [name, setName] = useState<string>("")
-  const [provider, setProvider] = useState<string>("") // 로그인 플랫폼
-  const navigate = useNavigate()
+  const [email, setEmail] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [provider, setProvider] = useState<string>(""); // 로그인 플랫폼
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://localhost:8000/me", {
       credentials: "include",
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Not logged in")
-        return res.json()
+        if (!res.ok) throw new Error("Not logged in");
+        return res.json();
       })
       .then((data) => {
-        console.log("🙋 전체 회원 정보:", data)
-        console.log("🛡 로그인 소셜:", data.provider)
-        console.log("🧑‍💻 이름:", data.name)
-        console.log("📧 이메일:", data.email)
+        console.log("🙋 전체 회원 정보:", data);
+        console.log("🛡 로그인 소셜:", data.provider);
+        console.log("🧑‍💻 이름:", data.name);
+        console.log("📧 이메일:", data.email);
 
-        sessionStorage.setItem("user", JSON.stringify(data))
-        setEmail(data.email)
-        setName(data.name)
-        setProvider(data.provider)
+        sessionStorage.setItem("user", JSON.stringify(data));
+        setEmail(data.email);
+        setName(data.name);
+        setProvider(data.provider);
       })
       .catch(() => {
-        sessionStorage.removeItem("user")
-        navigate("/profile")
-      })
-  }, [])
+        sessionStorage.removeItem("user");
+        navigate("/profile");
+      });
+  }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("user")
-    navigate("/profile")
-  }
+    fetch("http://localhost:8000/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    sessionStorage.removeItem("user");
+    navigate("/");
+  };
+
+  const handleUnregister = () => {
+    fetch("http://localhost:8000/unregister", {
+      method: "POST",
+      credentials: "include",
+    });
+    sessionStorage.removeItem("user");
+    navigate("/");
+  };
 
   return (
     <div className="flex flex-col h-screen bg-white relative">
@@ -77,6 +90,17 @@ export default function ProfilePage() {
             </div>
             <span className="text-gray-400">›</span>
           </div>
+
+          <div
+            className="flex items-center justify-between border-t pt-4 cursor-pointer"
+            onClick={handleUnregister}
+          >
+            <div className="flex items-center gap-3 text-gray-700">
+              <LogOut className="w-5 h-5" />
+              <span>Unregister</span>
+            </div>
+            <span className="text-gray-400">›</span>
+          </div>
         </div>
       </div>
 
@@ -84,5 +108,5 @@ export default function ProfilePage() {
         <BottomTabBar />
       </div>
     </div>
-  )
+  );
 }
