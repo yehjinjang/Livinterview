@@ -105,9 +105,42 @@ async def stream_summary(conversation: str):
     yield "__END__STREAM__"
 
 # 초기 이미지 분석 시작
-async def run_initial_prompt(image_url: str):
-    async for token in stream_initialize_response(image_url):
+async def run_initial_prompt(original_image_url: str):
+    # 1) Vision Analyze → 구조 설명 스트림 얻기
+    async with aiohttp.ClientSession() as session:
+        vres = await session.post(
+            "http://localhost:8000/vision/analyze-image",
+            data={"image": original_image_url}  # 또는 UploadFile 형식
+        )
+        vreader = vres.content.iter_any()
+        # 여기에 __IMAGE_ID__ 토큰 처리 로직 삽입 (필요 시)
+        async for chunk in vreader:
+            yield chunk.decode()
+
+    # 2) 빈 방 생성
+    async with aiohttp.ClientSession() as session:
+        ires = await session.post(
+            "http://localhost:8000/cleaning/inpaint",
+            data={"image_id": obtained_image_id}
+        )
+        data = await ires.json()
+        blank_url = data["inpainted_url"]
+        # 최초 빈 방 이미지는 프론트가 수신할 수 있도록 토큰으로 넘겨주기
+        yield f"__BLANK_URL__:{blank_url}__END__STREAM__"
+
+    # 3) GPT에게 “이 빈 방을 바탕으로 구조 설명 → 인테리어 제안” 요청
+    callback = AsyncIteratorCallbackHandler()
+    llm = ChatOpenAI(model="gpt-4o", streaming=True, callbacks=[callback])
+    # prompt 구성 시 blank_url을 활용
+    messages = [
+        SystemMessage(content="당신은 인테리어 도우미입니다."),
+        HumanMessage(content=f"다음 빈 방 사진을 보고 구조를 설명해줘: {blank_url}"),
+    ]
+    task = asyncio.create_task(llm.ainvoke(messages))
+    async for token in callback.aiter():
         yield token
+    await task
+    yield "__END__STREAM__"
 
 # 사용자 입력 처리
 async def run_user_turn(user_input: str):

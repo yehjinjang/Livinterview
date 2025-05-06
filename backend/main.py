@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from fastapi.staticfiles import StaticFiles
 from core.config import SESSION_SECRET_KEY, SESSION_COOKIE
 from routes.google import router as google_router
 from routes.kakao import router as kakao_router
@@ -10,6 +11,9 @@ from routes.chat import router as chat_router
 from routes.analyze import router as analyze_router
 from routes.vision_analyze import router as vision_router
 from routes.generate import router as generate_router
+from routes.cleaning import router as cleaning_router
+from routes.data import router as data_router 
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -41,6 +45,9 @@ app.include_router(chat_router, tags=["Chat"])
 app.include_router(analyze_router, prefix="/analyze", tags=["Analyze"])
 app.include_router(vision_router, prefix="/vision", tags=["VisionAnalyze"])
 app.include_router(generate_router, tags=["Generate"])
-from routes.data import router as data_router
+app.include_router(cleaning_router, prefix="/cleaning", tags=["Cleaning"])
+
+# 정적 파일 서빙 경로 추가
+app.mount("/static", StaticFiles(directory="data"), name="static")
 
 # from routes.roomie import router as roomie_router

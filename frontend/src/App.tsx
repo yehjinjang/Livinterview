@@ -8,6 +8,7 @@ import RoomieHome from "./pages/RoomieHome";
 import ProfilePage from "./pages/ProfilePage";
 import RoomieChat from "./pages/RoomieChat";
 import RoomieResult from "./pages/RoomieResult";
+import RoomieClean from "./pages/RoomieClean";
 
 function App() {
   return (
@@ -20,7 +21,8 @@ function App() {
         <Route path="/report/view" element={<ReportView />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/roomie" element={<RoomieHome />} />
-        <Route path="/roomie/interior" element={<RoomieChat />} />
+        <Route path="/roomie/clean"    element={<RoomieClean />} />
+        <Route path="/roomie/chat"     element={<RoomieChat />} />
         <Route path="/roomie/result" element={<RoomieResult />} />
       </Routes>
     </BrowserRouter>
