@@ -7,6 +7,7 @@ from PIL import Image
 from diffusers import AutoPipelineForInpainting
 import os
 import torch
+from chatbot_core.memory.session_memory import memory
 
 router = APIRouter()
 
@@ -98,11 +99,13 @@ async def create_removal(
 @router.post("/inpaint")
 async def run_inpaint(image_id: str = Form(...)):
     try:
+        # 1) 원본 로드
         input_path = f"./data/uploads/{image_id}.jpg"
         original_image = Image.open(input_path).convert("RGB")
         original_size = original_image.size
         image = original_image.resize((512, 512))
 
+        # 2) 마스크 생성
         args = SimpleNamespace(
             input_image=input_path,
             output_dir=f"./data/results/{image_id}",
@@ -124,13 +127,24 @@ async def run_inpaint(image_id: str = Form(...)):
 
         mask = mask_image.resize((512, 512))
 
+        # 3) 메모리에서 간략 구조 설명 꺼내오기
+        brief_msgs = [
+            m.content.replace("[간략구조]", "").strip()
+            for m in memory.chat_memory.messages
+            if m.content.startswith("[간략구조]")
+        ]
+        brief = brief_msgs[-1] if brief_msgs else ""
+        inpaint_prompt = f"{brief}. {positive_prompt}"
+
+        # 4) inpainting 실행
         result = pipe(
-            prompt=positive_prompt,
+            prompt=inpaint_prompt,
             negative_prompt=negative_prompt,
             image=image,
             mask_image=mask
         ).images[0]
 
+        # 5) 리사이즈 후 저장
         result = result.resize(original_size, Image.LANCZOS)
         output_path = os.path.join(args.output_dir, "sd_inpainted_room.png")
         result.save(output_path)

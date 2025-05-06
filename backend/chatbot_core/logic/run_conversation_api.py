@@ -188,15 +188,14 @@ async def run_user_turn(user_input: str):
         ]
 
         if result == "YES":
-            # 구조 설명 가져오기
-            structure_context = next(
-                (m.content.replace("[방 구조]", "").strip()
-                for m in memory.chat_memory.messages if m.content.startswith("[방 구조]")),
-                ""
-            )
+            # Vision Analyze 에서 미리 저장해 둔 영어 상세 구조 가져오기
+            detailed = memory.variables.get("detailed_structure", "")
 
-            # 구조 + 요약 합치기
-            final_summary = f"{structure_context}. {last_summary}" if structure_context else last_summary
+            # 상세 구조 + 대화 요약 결합
+            if last_summary:
+                final_summary = f"{detailed} Also, here’s a quick recap: {last_summary}"
+            else:
+                final_summary = detailed
 
             # memory에 저장해둠 (프론트에서 generate-image 호출 시 활용)
             memory.variables["confirmed_summary"] = final_summary
