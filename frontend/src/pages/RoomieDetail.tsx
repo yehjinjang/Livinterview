@@ -46,7 +46,7 @@ export default function RoomDetail({
 
         {/* AI 인테리어 연결 */}
         <button
-          onClick={() => navigate("/interior", {
+          onClick={() => navigate("/roomie/clean", {
             state: {
               imageUrl: room.imageUrl || "https://d1774jszgerdmk.cloudfront.net/1024/lm8eYHMOCkTo_TysRVv38", 
               title: room.title || "방 정보",
