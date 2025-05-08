@@ -1,15 +1,22 @@
-import { Room } from "../types/room"
-import { motion } from "framer-motion"
-import { useNavigate } from "react-router-dom"
+import { Room } from "../types/room";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 export default function RoomDetail({
   room,
   onClose,
 }: {
-  room: Room
-  onClose: () => void
+  room: Room;
+  onClose: () => void;
 }) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  // 👉 테스트 이미지 기본값
+  const defaultImageUrl =
+    "https://github.com/Livinterview/Livinterview/raw/dev/backend/empty-room-gen/inpaint/test.png";
+
+  // 👉 실제로 쓸 이미지 URL
+  const imageUrl = room.imageUrl || defaultImageUrl;
 
   return (
     <motion.div
@@ -26,10 +33,10 @@ export default function RoomDetail({
         </button>
       </div>
 
-      {/* 매물 이미지 예시 */}
+      {/* 매물 이미지 */}
       <div className="w-full h-60 bg-gray-100 flex items-center justify-center">
         <img
-          src={room.imageUrl || "/icons/images.jpg"}
+          src={imageUrl}
           alt="매물 사진"
           className="object-cover w-full h-full"
         />
@@ -46,17 +53,19 @@ export default function RoomDetail({
 
         {/* AI 인테리어 연결 */}
         <button
-          onClick={() => navigate("/roomie/clean", {
-            state: {
-              imageUrl: room.imageUrl || "https://d1774jszgerdmk.cloudfront.net/1024/lm8eYHMOCkTo_TysRVv38", 
-              title: room.title || "방 정보",
-            }
-          })}
+          onClick={() =>
+            navigate("/roomie/clean", {
+              state: {
+                imageUrl,
+                title: room.title || "방 정보",
+              },
+            })
+          }
           className="w-full mt-4 bg-zipup-600 text-white text-sm py-3 rounded-xl hover:bg-blue-700 transition"
         >
           AI인테리어 도우미 연결
         </button>
       </div>
     </motion.div>
-  )
+  );
 }
