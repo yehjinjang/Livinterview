@@ -1,0 +1,19 @@
+pyyaml
+tqdm
+numpy
+easydict==1.9
+scikit-image==0.19.3        # ← 0.17.2에서 올림 (Python 3.12 호환)
+scikit-learn==1.4.2         # ← 최신버전 기준
+opencv-python
+tensorflow
+joblib
+matplotlib
+pandas
+albumentations==0.5.2
+hydra-core==1.1.0
+pytorch-lightning==1.2.9
+tabulate
+kornia==0.5.0
+webdataset
+packaging
+wldhx.yadisk-direct

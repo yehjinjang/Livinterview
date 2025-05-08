@@ -9,3 +9,5 @@ itsdangerous
 langchain
 langchain_community
 langchain-openai
+redis
+pymysql
