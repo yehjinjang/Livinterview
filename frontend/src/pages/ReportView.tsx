@@ -45,11 +45,12 @@ export default function ReportView() {
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-100 py-12 px-4 overflow-x-hidden">
-      {/* 상단 제목 */}
-      <h1 className="text-2xl font-bold text-blue-600 mb-8">리포트 상세 보기</h1>
+      {/* 상단 제목 + PDF 버튼을 수평 정렬 */}
+      <div className="w-full max-w-[794px] mb-6 text-center">
+        <h1 className="text-4xl font-bold text-blue-600">리포트 상세 보기</h1>
+      </div>
 
-      {/* PDF 저장 버튼 */}
-      <div className="absolute top-6 right-6">
+      <div className="w-full max-w-[794px] flex justify-end mb-8 px-2">
         <button
           onClick={handleDownloadPDF}
           className="px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
