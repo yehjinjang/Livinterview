@@ -46,13 +46,13 @@ async def analyze_image(req: ImageRequest):
         )
         DETECTED_RESULTS[image_id] = detection_result
 
-        # ✅ 간략 구조 설명 (Vision 기반)
+        # 간략 구조 설명 (Vision 기반)
         brief_msg = await brief_structure_chain.ainvoke({"image_path": local_path})
         brief = brief_msg.content
         yield f"[간략구조] {brief}\n"
         memory.save_context({"input": "[system] 간략 구조 설명"}, {"output": f"[간략구조] {brief}"})
 
-        # ✅ 상세 구조 설명 (Vision 기반)
+        # 상세 구조 설명 (Vision 기반)
         detailed_msg = await detailed_structure_chain.ainvoke({"image_path": local_path})
         detailed = detailed_msg.content
         yield f"[상세구조] {detailed}\n"

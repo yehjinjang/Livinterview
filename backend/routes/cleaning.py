@@ -32,13 +32,19 @@ def load_models():
     )
     return groundingdino_model, sam_model, ram_model
 
-# ────────────────
-# 인페인팅 모델 로딩 (전역)
-# ────────────────
-pipe = AutoPipelineForInpainting.from_pretrained(
-    "stabilityai/stable-diffusion-2-inpainting",
-    torch_dtype=torch.float16
-).to("cuda" if torch.cuda.is_available() else "cpu")
+# ──────────────────────────────
+# 인페인팅 모델 지연 로딩 함수
+# ──────────────────────────────
+def get_inpaint_pipeline():
+    return AutoPipelineForInpainting.from_pretrained(
+        "stabilityai/stable-diffusion-2-inpainting",
+        torch_dtype=torch.float16
+    ).to("cuda" if torch.cuda.is_available() else "cpu")
+
+
+# ──────────────────────────────
+# 프롬프트 상수
+# ──────────────────────────────
 
 positive_prompt = "a completely empty room. minimalist. clean. nothing inside."
 negative_prompt = (
@@ -158,6 +164,7 @@ async def run_inpaint(image_id: str = Form(...)):
         print(f"[inpaint] 프롬프트: {inpaint_prompt}")
 
         # 모델 실행
+        pipe = get_inpaint_pipeline() 
         result = pipe(
             prompt=inpaint_prompt,
             negative_prompt=negative_prompt,

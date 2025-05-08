@@ -5,12 +5,10 @@ from langchain.callbacks.streaming_aiter import AsyncIteratorCallbackHandler
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from chatbot_core.memory.session_memory import memory
-from chatbot_core.chains import (
-    check_completion_chain,
-    extract_structure_chain,
-    check_agreement_chain,
-    furniture_warning_chain,
-)
+from chatbot_core.chains.check_completion_chain import get_check_completion_chain
+from chatbot_core.chains.extract_structure_chain import get_extract_structure_chain
+from chatbot_core.chains.check_agreement_chain import get_check_agreement_chain
+from chatbot_core.chains.furniture_warning_chain import get_furniture_warning_chain
 from chatbot_core.prompts import chat_prompt, summary_prompt, system_prompt
 from chatbot_core.logic.common import count_unique_furniture_mentions
 
@@ -83,7 +81,7 @@ async def run_initial_prompt(blank_room_url: str):
 
     await task
 
-    structure_desc = extract_structure_chain.run({"response": full_response}).strip()
+    structure_desc = get_extract_structure_chain().run({"response": full_response}).strip()
     memory.chat_memory.add_ai_message(f"[방 구조] {structure_desc}")
 
     yield "__END__STREAM__"
@@ -124,7 +122,7 @@ async def run_user_turn(user_input: str):
 
     if ai_messages and ai_messages[-1] == "SUMMARY_PENDING_CONFIRMATION":
         last_summary = ai_messages[-2] if len(ai_messages) >= 2 else ""
-        result = check_agreement_chain.run(gpt_response=last_summary, text=user_input).strip().upper()
+        result = get_check_agreement_chain().run(gpt_response=last_summary, text=user_input).strip().upper()
         memory.chat_memory.messages = [m for m in memory.chat_memory.messages if m.content != "SUMMARY_PENDING_CONFIRMATION"]
 
         if result == "YES":
@@ -141,7 +139,7 @@ async def run_user_turn(user_input: str):
                     yield chunk
             return
 
-    if check_completion_chain.run(text=user_input).strip().upper() == "YES":
+    if get_check_completion_chain().run(text=user_input).strip().upper() == "YES":
         async for chunk in stream_fixed_message("좋아, 그럼 이대로 꾸며볼게! 오른쪽 아래 '인테리어 생성' 버튼을 눌러줘."):
             yield chunk
         yield "__END__STREAM__"
@@ -149,7 +147,7 @@ async def run_user_turn(user_input: str):
 
     already_warned = any("[가구 경고]" in m.content for m in memory.chat_memory.messages)
     if not already_warned and count_unique_furniture_mentions(only_user_conversation) == 6:
-        warning = furniture_warning_chain.run({"conversation": full_conversation}).strip()
+        warning = get_furniture_warning_chain().run({"conversation": full_conversation}).strip()
         memory.chat_memory.add_ai_message(f"[가구 경고] {warning}")
         async for chunk in stream_fixed_message(warning):
             yield chunk
