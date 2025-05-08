@@ -4,10 +4,30 @@ from pydantic import BaseModel
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
+import uuid
+import aiohttp
+import aiofiles
 
 from chatbot_core.logic.run_conversation_api import run_initial_prompt, run_user_turn
 from chatbot_core.memory.session_memory import memory
 from chatbot_core.chains import summary_chain, controlnet_chain
+
+UPLOAD_DIR = "./data/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+async def save_image_from_url(image_url: str) -> str:
+    image_id = str(uuid.uuid4())
+    image_path = os.path.join(UPLOAD_DIR, f"{image_id}.jpg")
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(image_url) as resp:
+            if resp.status != 200:
+                raise ValueError("이미지 다운로드 실패")
+
+            async with aiofiles.open(image_path, mode="wb") as f:
+                await f.write(await resp.read())
+
+    return image_id
 
 # ───── 환경 변수 로드 및 클라이언트 초기화 ─────
 load_dotenv()
@@ -19,13 +39,15 @@ router = APIRouter()
 class ChatRequest(BaseModel):
     image_url: str | None = None
     user_input: str | None = None
+    image_id: str | None = None  # 프론트에서 넘겨주는 값
 
 # ───── /chat 스트리밍 라우터 ─────
+# chat.py
 @router.post("/chat")
 async def chat(request: ChatRequest):
     if request.image_url:
         async def event_stream():
-            async for chunk in run_initial_prompt(request.image_url):
+            async for chunk in run_initial_prompt(request.image_url):  # 여기에 blankRoomUrl이 넘어옴
                 yield chunk
         return StreamingResponse(event_stream(), media_type="text/plain")
 
@@ -38,6 +60,7 @@ async def chat(request: ChatRequest):
     async def error_stream():
         yield "image_url 또는 user_input 중 하나는 반드시 포함되어야 합니다."
     return StreamingResponse(error_stream(), media_type="text/plain")
+
 
 # ───── /generate-image 엔드포인트 ─────
 @router.post("/generate-image")
