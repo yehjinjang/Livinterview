@@ -7,8 +7,8 @@ lama-venv/
 
 .DS_Store
 
-models/
-data/
+# models/
+# data/
 node_modules/
 dist/
 *.tsbuildinfo

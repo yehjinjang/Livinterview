@@ -8,10 +8,11 @@ from routes.kakao import router as kakao_router
 from routes.naver import router as naver_router
 from routes.user import router as user_router
 from routes.chat import router as chat_router
+from routes.data import router as data_router
 from routes.vision_analyze import router as vision_router
 from routes.generate import router as generate_router
 from routes.cleaning import router as cleaning_router
-from routes.data import router as data_router 
+
 
 from dotenv import load_dotenv
 load_dotenv()

@@ -5,6 +5,8 @@ python-dotenv
 starlette
 httpx
 itsdangerous
+redis
+pymysql
 
 
 ########## ────────── FastAPI 서버 & 스트리밍 ──────────
@@ -61,3 +63,4 @@ tqdm==4.67.1
 scipy==1.15.2
 scikit-learn==1.6.1          # 가구 개수 카운트 util
 matplotlib==3.10.1           # (옵션) 모델 디버깅 / 결과 저장
+
