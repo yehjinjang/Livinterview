@@ -12,7 +12,6 @@ from chatbot_core.logic.run_conversation_api import run_initial_prompt, run_user
 from chatbot_core.memory.session_memory import memory
 from chatbot_core.chains import summary_chain, controlnet_chain
 
-
 UPLOAD_DIR = "./data/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -30,7 +29,6 @@ async def save_image_from_url(image_url: str) -> str:
 
     return image_id
 
-
 # ───── 환경 변수 로드 및 클라이언트 초기화 ─────
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -41,27 +39,17 @@ router = APIRouter()
 class ChatRequest(BaseModel):
     image_url: str | None = None
     user_input: str | None = None
+    image_id: str | None = None  # 프론트에서 넘겨주는 값
 
 # ───── /chat 스트리밍 라우터 ─────
+# chat.py
 @router.post("/chat")
 async def chat(request: ChatRequest):
     if request.image_url:
-        try:
-            # 1. 이미지 저장
-            image_id = await save_image_from_url(request.image_url)
-
-            # 2. 스트리밍 응답에 image_id를 먼저 보냄
-            async def event_stream():
-                yield f"__IMAGE_ID__:{image_id}__END__STREAM__"
-                async for chunk in run_initial_prompt(request.image_url):
-                    yield chunk
-
-            return StreamingResponse(event_stream(), media_type="text/plain")
-
-        except Exception as e:
-            async def error_stream():
-                yield f"에러: {str(e)}"
-            return StreamingResponse(error_stream(), media_type="text/plain")
+        async def event_stream():
+            async for chunk in run_initial_prompt(request.image_url):  # 여기에 blankRoomUrl이 넘어옴
+                yield chunk
+        return StreamingResponse(event_stream(), media_type="text/plain")
 
     if request.user_input:
         async def event_stream():
