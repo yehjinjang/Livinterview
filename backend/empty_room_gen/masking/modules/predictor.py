@@ -1,6 +1,11 @@
 import torch
-from empty_room_gen.recognize_anything.segment_anything import build_sam, SamPredictor
-from empty_room_gen.recognize_anything.groundingdino.util.utils import get_phrases_from_posmap
+from segment_anything import SamPredictor, sam_model_registry
+from groundingdino.util.utils import get_phrases_from_posmap
+
+def build_sam(checkpoint: str, model_type="vit_h", device="cuda"):
+    model = sam_model_registry[model_type](checkpoint=checkpoint)
+    model.to(device)
+    return model
 
 def get_grounding_output(model, image, caption, box_thresh, text_thresh, device="cpu"):
     caption = caption.strip().lower()
@@ -19,7 +24,7 @@ def get_grounding_output(model, image, caption, box_thresh, text_thresh, device=
 
     tokenized = model.tokenizer(caption)
     phrases = [
-        get_phrases_from_posmap(l > text_thresh, tokenized, model.tokenizer) + f"({l.max().item():.2f})"
+        get_phrases_from_posmap(l > text_thresh, tokenized, model.tokenizer)
         for l in logits
     ]
     return boxes, logits.max(dim=1)[0], phrases

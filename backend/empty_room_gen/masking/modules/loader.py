@@ -1,28 +1,28 @@
 from PIL import Image
 import torch
 import torchvision.transforms as TS
-from empty_room_gen.recognize_anything.groundingdino.datasets.transforms import Compose as T
-from empty_room_gen.recognize_anything.groundingdino.util.slconfig   import SLConfig
-from empty_room_gen.recognize_anything.groundingdino.models           import build_model
-from empty_room_gen.recognize_anything.groundingdino.util.utils       import clean_state_dict
-
+import groundingdino.datasets.transforms as GD
+from groundingdino.util.slconfig import SLConfig
+from groundingdino.models        import build_model
+from groundingdino.util.utils    import clean_state_dict
 
 def load_image(image_path):
     image_pil = Image.open(image_path).convert("RGB")
-    transform = T.Compose([
-        T.RandomResize([800], max_size=1333),
-        T.ToTensor(),
-        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-    ])
-    image, _ = transform(image_pil, None)
-    return image_pil, image
 
+    # 1) Grounding‑DINO 전처리: RandomResize → PIL.Image 반환
+    resized_pil, _ = GD.RandomResize([800], max_size=1333)(image_pil, None)
+
+    # 2) TorchVision → Tensor [C,H,W]
+    image_tensor = TS.ToTensor()(resized_pil)
+
+    return image_pil, image_tensor        # ← 두 번째 값이 텐서!
 
 def load_model_gdino(config_path, ckpt_path, device):
-    args = SLConfig.fromfile(config_path)
+    args  = SLConfig.fromfile(config_path)
     args.device = device
     model = build_model(args)
-    ckpt = torch.load(ckpt_path, map_location="cpu")
+    ckpt  = torch.load(ckpt_path, map_location="cpu")
     model.load_state_dict(clean_state_dict(ckpt["model"]), strict=False)
     model.eval()
+    print(args.backbone)
     return model.to(device)

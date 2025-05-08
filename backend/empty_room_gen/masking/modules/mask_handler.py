@@ -10,7 +10,11 @@ def save_and_merge_masks(masks, labels, remove_items, output_dir, image_shape):
 
     for i, (mask, label) in enumerate(zip(masks, labels)):
         if label in remove_items:
-            mask_np = mask[0].cpu().numpy().astype(np.uint8)
+            # new ― 타입 체크 + squeeze
+            if isinstance(mask, torch.Tensor):
+                mask_np = mask.squeeze(0).cpu().numpy().astype(np.uint8)
+            else:                           # PIL.Image or np.ndarray
+                mask_np = np.array(mask).astype(np.uint8)
 
             mask_area = np.sum(mask_np)
             h_, w_ = mask_np.shape
