@@ -48,17 +48,17 @@ export default function ReportViewResult() {
         }}
       >
         {/* 🧑 사용자 이름 */}
-        <div style={{ position: "absolute", top: "265px", left: "190px", fontSize: "20px", fontWeight: "bold", fontFamily: "Pretendard-Regular" }}>
+        <div style={{ position: "absolute", top: "205px", left: "470px", fontSize: "20px", fontWeight: "bold", fontFamily: "Pretendard-Regular" }}>
           {userName}
         </div>
 
         {/* 🧑 사용자 이름 */}
-        <div style={{ position: "absolute", top: "375px", left: "60px", fontSize: "18px", fontWeight: "bold", fontFamily: "Pretendard-Regular" }}>
+        <div style={{ position: "absolute", top: "295px", left: "50px", fontSize: "18px", fontWeight: "bold", fontFamily: "Pretendard-Regular" }}>
           {userName}
         </div>
 
         {/* 📌 중요 지표 리스트 */}
-        <div style={{ position: "absolute", top: "375px", left: "380px", fontSize: "18px", display: "flex", gap: "27px", fontFamily: "Pretendard-Regular" }}>
+        <div style={{ position: "absolute", top: "295px", left: "370px", fontSize: "18px", display: "flex", gap: "27px", fontFamily: "Pretendard-Regular" }}>
           {topIndicators.map((indicator: string, idx: number) => (
             <span key={idx} style={{ display: "inline-block" }}>
               {indicator}
@@ -89,7 +89,7 @@ export default function ReportViewResult() {
                 alt={`${indicator} 이미지`}
                 style={{
                   position: "absolute",
-                  top: "435px",
+                  top: "350px",
                   left: `${65 + idx * 240}px`,
                   width: "180px",
                   height: "180px",
@@ -99,8 +99,8 @@ export default function ReportViewResult() {
               <div
                 style={{
                   position: "absolute",
-                  top: "633px",
-                  left: `${110 + idx * 240}px`,
+                  top: "540px",
+                  left: `${95 + idx * 240}px`,
                   fontSize: "27px",
                   fontWeight: "bold",
                   color: "white",
@@ -112,18 +112,44 @@ export default function ReportViewResult() {
           );
         })}
 
+        {/* 📌 설명 텍스트 영역 */}
+        <div
+          style={{
+            position: "absolute",
+            top: "600px",
+            left: "29px",
+            fontFamily: "Pretendard-Regular",
+            fontSize: "14px",
+            color: "#333",
+            lineHeight: "1.6",
+            width: "720px",
+            boxSizing: "border-box",
+          }}
+        >
+          {[
+            "집을 찾으실 때 다양한 부분들을 복합적으로 고려하시겠지만, 집 근처 대형 마트, 은행, 우체국 등의 시설이 집 근처에 있는지 중요하게 생각하시는 군요. 그 외 그 동네가 얼마나 안전한지, 경찰서는 집에서 얼마나 가까운 곳에 있는지, 집 근처 지하철 역의 위치 등이 집과 가까운지 등을 신경 쓰시는 스타일이시네요.",
+            "실제 내가 살아보면 어떨까에 대해 생각하면서 여러 요소를 꼼꼼하게 확인하고 주거지를 고르는 당신을 위해 안전하면서도 편안함이 있는 오피스텔들을 찾아볼게요!",
+          ].map((text, idx) => (
+            <div key={idx} style={{ display: "flex", marginBottom: "6px" }}>
+              <span style={{ color: "#0E6D62", fontWeight: "bold", marginRight: "8px" }}>●</span>
+              <p style={{ margin: 0, padding: 0 }}>{text}</p>
+            </div>
+          ))}
+        </div>
+
+
         {/* 📊 하단 지표 결과 */} 
-        <div style={{ position: "absolute", top: "720px", left: "38px", fontFamily: "Pretendard-Regular", fontSize: "13px", width: "720px", maxHeight: "380px", overflow: "hidden",  boxSizing: "border-box" }}>
-          <div style={{ backgroundColor: "#4c8689", color: "white", padding: "10px 12px", fontSize: "15px", lineHeight: "1.6", whiteSpace: "nowrap", width: "234px" }}>
+        <div style={{ position: "absolute", top: "745px", left: "29px", fontFamily: "Pretendard-Regular", fontSize: "13px", width: "720px", maxHeight: "380px", overflow: "hidden",  boxSizing: "border-box" }}>
+          <div style={{ backgroundColor: "#4c8689", color: "white", padding: "5px 12px", fontSize: "15px", lineHeight: "1.6", whiteSpace: "nowrap", width: "251px" }}>
             <span style={{ fontWeight: "bold", fontSize: "18px" }}>{userName}</span> 님의 8가지 지표 분석
           </div>
 
           <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
             <thead>
-              <tr style={{ backgroundColor: "#E9F0EF", color: "#333", fontSize: "16px" }}>
-                <th style={{ padding: "8px", border: "1px solid #2D7F7F", width: "50px", textAlign: "center", color: "#4c8689", backgroundColor: "#d4e4e5" }}>지표</th>
-                <th style={{ padding: "8px", border: "1px solid #2D7F7F", width: "200px", textAlign: "center", color: "#4c8689" }}>중요도</th>
-                <th style={{ padding: "8px", border: "1px solid #2D7F7F", textAlign: "center", color: "#4c8689" }}>설명</th>
+              <tr style={{ backgroundColor: "#E9F0EF", color: "#333", fontSize: "15px" }}>
+                <th style={{ padding: "5px", border: "1px solid #2D7F7F", width: "50px", textAlign: "center", color: "#4c8689", backgroundColor: "#d4e4e5" }}>지표</th>
+                <th style={{ padding: "5px", border: "1px solid #2D7F7F", width: "200px", textAlign: "center", color: "#4c8689" }}>중요도</th>
+                <th style={{ padding: "5px", border: "1px solid #2D7F7F", textAlign: "center", color: "#4c8689" }}>설명</th>
               </tr>
             </thead>
             <tbody>
