@@ -41,76 +41,108 @@ export default function ReportViewResult() {
           width: "794px",
           height: "1123px",
           backgroundImage: "url('/icons/report/all_report_view/03_result.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundSize: "100% 100%",
+          backgroundPosition: "top left",
           position: "relative",
           boxShadow: "0 0 8px rgba(0,0,0,0.1)",
         }}
       >
         {/* 🧑 사용자 이름 */}
         <div style={{ position: "absolute", top: "205px", left: "470px", fontSize: "20px", fontWeight: "bold", fontFamily: "Pretendard-Regular" }}>
-          {userName}
+          <span style={{
+              color: "black",
+            }}>{userName}</span> <span style={{ color: "#4c8689"  }}>님의 삶권분석</span>
         </div>
-
-        {/* 🧑 사용자 이름 */}
-        <div style={{ position: "absolute", top: "295px", left: "50px", fontSize: "18px", fontWeight: "bold", fontFamily: "Pretendard-Regular" }}>
-          {userName}
-        </div>
+        
 
         {/* 📌 중요 지표 리스트 */}
-        <div style={{ position: "absolute", top: "295px", left: "370px", fontSize: "18px", display: "flex", gap: "27px", fontFamily: "Pretendard-Regular" }}>
+        <div
+          style={{
+            position: "absolute",
+            top: "295px",
+            left: "50px",
+            display: "flex",
+            alignItems: "center",
+            fontSize: "19px",
+            color: "#4c8689",
+            gap: "6px",
+            lineHeight: "1.5",
+            fontFamily: "Pretendard-Regular"
+          }}
+        >
+          <span style={{
+            fontWeight: "bold",
+            color: "black"
+          }}>
+            {userName}
+          </span>
+          <span>님은 거주지를 선택하실 때,</span>
           {topIndicators.map((indicator: string, idx: number) => (
-            <span key={idx} style={{ display: "inline-block" }}>
+            <span key={idx} style={{
+              fontWeight: "bold",
+              color: "black"
+            }}>
               {indicator}
             </span>
           ))}
+          <span>부분을 중요하게 생각하시네요.</span>
         </div>
 
+        
+
         {/* 🖼️ 중요 지표 아이콘 이미지 3개 */}
-        {topIndicators.map((indicator: string, idx: number) => {
+        <div
+          style={{
+            position: "relative",
+            width: "794px", // A4 비율 기준으로 명시
+            height: "700px", // 이미지+텍스트 총 높이 고려
+          }}
+        >
+          {topIndicators.map((indicator: string, idx: number) => {
+            const indicatorImageMap: Record<string, string> = {
+              생활: "life",
+              안전: "safety",
+              교통: "transfer",
+              편의: "convenience",
+              건강: "health",
+              녹지: "green",
+              놀이: "play",
+              운동: "workout",
+            };
+            const folderName = indicatorImageMap[indicator];
+            const imagePath = `/icons/report/${folderName}/0.png`;
 
-          const indicatorImageMap: Record<string, string> = {
-            생활: "life",
-            안전: "safety",
-            교통: "transfer",
-            편의: "convenience",
-            건강: "health",
-            녹지: "green",
-            놀이: "play",
-            운동: "workout",
-          };
-          const folderName = indicatorImageMap[indicator];
-          const imagePath = `/icons/report/${folderName}/0.svg`;
-
-          return (
-            <div key={idx}>
-              <img
-                src={imagePath}
-                alt={`${indicator} 이미지`}
-                style={{
-                  position: "absolute",
-                  top: "350px",
-                  left: `${65 + idx * 240}px`,
-                  width: "180px",
-                  height: "180px",
-                  objectFit: "contain",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  top: "540px",
-                  left: `${95 + idx * 240}px`,
-                  fontSize: "27px",
-                  fontWeight: "bold",
-                  color: "white",
-                }}
-              >
-                {indicator} 지표
+            return (
+              <div key={idx}>
+                <img
+                  src={imagePath}
+                  alt={`${indicator} 이미지`}
+                  crossOrigin="anonymous"
+                  style={{
+                    position: "absolute",
+                    top: "350px",
+                    left: `${65 + idx * 240}px`,
+                    width: "180px",
+                    height: "180px",
+                    objectFit: "contain",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "538px",
+                    left: `${95 + idx * 240}px`,
+                    fontSize: "24px",
+                    fontWeight: "bold",
+                    color: "white",
+                  }}
+                >
+                  {indicator} 지표
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
 
         {/* 📌 설명 텍스트 영역 */}
         <div
@@ -182,9 +214,8 @@ export default function ReportViewResult() {
         </div>
 
 
-  
-
       </div>
     </div>
   );
 }
+

@@ -9,8 +9,8 @@ export default function ReportViewGuide() {
           width: "794px",
           height: "1123px",
           backgroundImage: "url('/icons/report/all_report_view/02_guide.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundSize:"100% 100%",
+          backgroundPosition:"top left",
           boxShadow: "0 0 8px rgba(0,0,0,0.1)",
           padding: "80px 60px",
           boxSizing: "border-box",
@@ -28,7 +28,7 @@ export default function ReportViewGuide() {
             whiteSpace: "pre-line",
             textAlign: "justify", // 왼쪽과 오른쪽 모두 정렬
             position: "absolute",
-            top: "190px",
+            top: "145px",
             left: "250px",
             right: "70px",
           }}

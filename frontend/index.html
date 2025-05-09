@@ -6,9 +6,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ZIPUP</title>
 
-    <!-- html2pdf.js CDN 추가 -->
+    <!-- Pretendard-Regular preload -->
+    <link
+      rel="preload"
+      href="https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff"
+      as="font"
+      type="font/woff"
+      crossorigin="anonymous"
+    />
+
+    <!-- ✅ Pretendard-Regular force-load -->
+    <style>
+      @font-face {
+        font-family: "Pretendard-Regular";
+        src: url("https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff")
+          format("woff");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      body {
+        font-family: "Pretendard-Regular", sans-serif;
+      }
+    </style>
+
+    <!-- html2pdf.js for PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
