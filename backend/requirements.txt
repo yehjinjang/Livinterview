@@ -33,7 +33,7 @@ langchain-openai==0.3.15
 torch==2.3.0+cu118           # CU118 wheel 사용
 torchvision==0.18.0+cu118
 timm==1.0.15                 # Swin-L 등 백본
-numpy==2.2.5
+numpy==1.26.4
 opencv-python==4.11.0.86
 pillow==11.2.1
 pycocotools==2.0.8           # NMS & COCO util
