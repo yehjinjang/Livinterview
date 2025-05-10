@@ -9,7 +9,7 @@ import os, uuid, aiohttp, aiofiles
 from chatbot_core.logic.run_conversation_api import run_initial_prompt, run_user_turn
 from chatbot_core.memory.session_memory import get_memory
 from chatbot_core.chains.summary_chain import get_summary_chain
-from chatbot_core.chains.controlnet_chain import get_controlnet_chain
+from chatbot_core.logic.run_conversation_api import stream_summary
 
 import logging
 
@@ -93,8 +93,6 @@ class SummaryRequest(BaseModel):
     session_id: str
 
 # ───── /analyze/summarize-memory 요약 라우터 ─────
-from chatbot_core.logic.run_conversation_api import stream_summary
-
 @router.post("/analyze/summarize-memory")
 async def summarize_memory(request: SummaryRequest):
     memory = get_memory(request.session_id)
@@ -112,54 +110,3 @@ async def summarize_memory(request: SummaryRequest):
 
     return {"result": result.replace("__END__STREAM__", "").strip()}
 
-
-# ───── /generate-image 엔드포인트 ─────
-@router.post("/generate-image")
-async def generate_image(request: ChatRequest):
-    try:
-        memory = get_memory(request.session_id)
-        logger.info("✅ memory 불러옴")
-        variables = memory.load_memory_variables({})
-        history = variables["chat_history"]
-        full_convo = "\n".join(str(m.content) for m in history)
-
-        summary = variables.get("confirmed_summary")
-        if not summary:
-            summary = get_summary_chain().run({"conversation": full_convo})
-
-        logger.info(f"[📝 요약 내용] {summary}")
-
-        # 메모리에서 [방 구조] 내용 불러오기
-        structure_desc = ""
-        for message in memory.chat_memory.messages:
-            if message.content.startswith("[상세구조]"):
-                structure_desc = message.content.replace("[상세구조]", "").strip()
-                break
-
-        base_prompt = get_controlnet_chain().run({
-                    "summary": summary,
-                    "structure_context": structure_desc  # 방 구조를 추가
-                }).strip().strip('"')
-        final_prompt = (
-            base_prompt
-            + " Do not change the room’s layout, dimensions, wallpaper color, "
-              "floor material, or the positions of the windows and doors, as they are fixed."
-        )
-        final_prompt = final_prompt[:2000]
-
-        logger.info(f"[🎨 ControlNet 프롬프트] {final_prompt}")
-
-        response = client.images.generate(
-            model="dall-e-3",
-            prompt=final_prompt,
-            n=1,
-            size="1024x1024",
-            quality="standard",
-        )
-        image_url = response.data[0].url
-        logger.info(f"[✅ DALL·E 응답] image_url: {image_url}")
-        return {"image_url": image_url}
-
-    except Exception as e:
-        logger.exception("❌ generate-image 실패")
-        raise HTTPException(status_code=500, detail=str(e))

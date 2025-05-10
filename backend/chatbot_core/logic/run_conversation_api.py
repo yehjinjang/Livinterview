@@ -11,6 +11,7 @@ from chatbot_core.chains.summary_chain import get_summary_chain
 from chatbot_core.chains.furniture_warning_chain import get_furniture_warning_chain
 from chatbot_core.prompts import summary_prompt, system_prompt
 from chatbot_core.logic.common import count_unique_furniture_mentions
+from chatbot_core.chains.structure_chains import detailed_structure_chain, brief_structure_chain
 
 import logging
 logger = logging.getLogger(__name__)
@@ -107,11 +108,19 @@ async def run_initial_prompt(session_id: str, image_id: str, is_clean: bool = Fa
     # 무조건 구조 분석 수행
     logger.info("[run_initial_prompt] 구조 분석 시작")
     local_path = f"./data/uploads/{image_id}.jpg"
-    from chatbot_core.chains.structure_chains import detailed_structure_chain
+    
+    # 상세 구조
     detailed_msg = await detailed_structure_chain.ainvoke({"image_path": local_path})
     structure_context = detailed_msg.content.strip()
     memory.chat_memory.add_ai_message(f"[상세구조][{image_id}] {structure_context}")
-    logger.info("[run_initial_prompt] 구조 분석 완료")
+    logger.info(f"[run_initial_prompt] 상세 구조 저장됨:\n{structure_context}")
+
+    # 간략 구조
+    brief_msg = await brief_structure_chain.ainvoke({"image_path": local_path})
+    brief_context = brief_msg.content.strip()
+    memory.chat_memory.add_ai_message(f"[간략구조] {brief_context}")
+    logger.info(f"[run_initial_prompt] 간략 구조 저장됨:\n{brief_context}")
+    
 
     # 시스템 메시지 생성
     system = SystemMessage(
@@ -130,10 +139,6 @@ async def run_initial_prompt(session_id: str, image_id: str, is_clean: bool = Fa
 
     await task
     logger.info("[run_initial_prompt] 스트리밍 완료")
-
-    structure_desc = get_extract_structure_chain().run({"response": full_response}).strip()
-    memory.chat_memory.add_ai_message(f"[방 구조] {structure_desc}")
-    logger.info("[run_initial_prompt] 구조 요약 저장 완료")
 
     yield "__END__STREAM__"
 
@@ -159,7 +164,7 @@ async def run_user_turn(user_input: str, session_id: str):
             text=user_input
         ).strip().upper()
 
-        if decision == "YES":
+        if decision == ("yes", "응", "네", "그래", "맞아"):
             detailed = memory.variables.get("detailed_structure", "")
             final_summary = (
                 f"{detailed} Also, here’s a quick recap: {last_summary}"
