@@ -1,183 +1,191 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import ChatMessageList from "../components/ChatMessageList";
+
+interface ChatState {
+  imageUrl: string;
+  title?: string;
+  sessionId: string;
+  imageId: string;
+  originalImageId?: string;
+}
+
+interface ChatMessage {
+  type: "text" | "image";
+  text?: string;
+  src?: string;
+  sender: "user" | "bot";
+}
 
 export default function RoomieClean() {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { imageUrl, title } = state as { imageUrl: string; title?: string };
+  const {
+    imageUrl,
+    title,
+    sessionId,
+    imageId: passedImageId,
+    originalImageId,
+  } = state as ChatState;
 
-  type Step = "analyzing" | "askClean" | "labeling";
-  const [step, setStep] = useState<Step>("analyzing");
-  const [imageId, setImageId] = useState<string>("");
+  type Step = "askClean" | "labeling";
+  const [step, setStep] = useState<Step>("askClean");
   const [labels, setLabels] = useState<string[]>([]);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<{
-    type: "text" | "image";
-    text?: string;
-    src?: string;
-    sender: "bot" | "user";
-  }[]>([]);
 
-  const didInit = useRef(false);
+  // 채팅 메시지 상태
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
+  // 초기 메시지 설정
   useEffect(() => {
-    if (!imageUrl || didInit.current) return;
-    didInit.current = true;
-
-    (async () => {
-      try {
-        // 빈방 이미지 분석 시작
-        const vRes = await fetch("http://localhost:8000/vision/analyze-image", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image_url: imageUrl }),
-        });
-
-        const reader = vRes.body?.getReader();
-        if (!reader) throw new Error("스트림 없음");
-
-        const decoder = new TextDecoder("utf-8");
-        let id = "";
-        while (!id) {
-          const { done, value } = await reader.read();
-          if (done) throw new Error("image_id 수신 실패");
-          const chunk = decoder.decode(value, { stream: true });
-          const m = chunk.match(/__IMAGE_ID__:(\S+)__END__STREAM__/);
-          if (m) id = m[1];
-        }
-
-        setImageId(id);
-        setStep("askClean");
-      } catch (e) {
-        console.error(e);
-        setError("이미지 분석 중 오류가 발생했어요.");
-      }
-    })();
-  }, [imageUrl]);
-
-  useEffect(() => {
-    if (!imageId || step !== "askClean") return;
+    if (!passedImageId || step !== "askClean") return;
     setMessages([
       { type: "text", text: "안녕! 난 인테리어 도우미 Roomie야 😊", sender: "bot" },
       { type: "image", src: imageUrl, sender: "bot" },
       { type: "text", text: "혹시 방에 치워야 할 가구들이 있다면 청소해줄 수 있어! 어떻게 할래?", sender: "bot" },
     ]);
-  }, [step, imageId]);
+  }, [passedImageId, step]);
 
+  // “청소할래” vs “이미 깨끗해” 분기
   const handleAskClean = async (clean: boolean) => {
-    if (!imageId) return;
-  
+    if (!passedImageId) return;
+
     if (!clean) {
-      // "이미 깨끗해" 선택 시 빈방 분석 모델을 실행하지 않고 바로 채팅 페이지로 이동
-      try {
-        navigate("/roomie/chat", {
-          state: {
-            imageUrl,
-            blankRoomUrl: imageUrl,
-            imageId, // 이미지 ID 전달
-          },
-        });
-      } catch (e) {
-        console.error(e);
-        setError("대화 시작 중 오류가 발생했어요.");
-      }
+      navigate("/roomie/chat", {
+        state: {
+          imageUrl,
+          blankRoomUrl: imageUrl,
+          imageId: passedImageId,
+          originalImageId,
+          title,
+          sessionId,
+          isClean: false,
+        },
+      });
       return;
     }
-  
-    // "청소할래" 선택 시 가구 감지 및 레이블 가져오기
+
+    // 청소하기 선택 시 가구 감지 진행
     setLoading(true);
-  
     try {
-      const fd = new FormData();
-      fd.append("image_id", imageId);
-      const { labels } = await fetch("http://localhost:8000/cleaning/labels", {
+      const respDetect = await fetch("http://localhost:8000/cleaning/detect", {
         method: "POST",
-        body: fd,
-      }).then((r) => r.json());
-  
-      setLabels(labels || []);
+        body: new URLSearchParams({ image_id: passedImageId }),
+      });
+      const detectJson = await respDetect.json();
+      if (detectJson.status !== "success") {
+        setError(detectJson.message);
+        return;
+      }
+
+      const respLabels = await fetch("http://localhost:8000/cleaning/labels", {
+        method: "POST",
+        body: new URLSearchParams({ image_id: passedImageId }),
+      });
+      const { labels: fetchedLabels } = await respLabels.json();
+      setLabels(fetchedLabels || []);
       setStep("labeling");
     } catch {
-      setError("감지된 가구를 가져오지 못했어요.");
+      setError("가구 감지에 실패했습니다. 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
   };
-  
 
-  const toggleItem = (item: string) => {
-    setSelectedItems((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+  const toggleLabel = (idx: number) => {
+    setSelectedIndices(prev =>
+      prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
     );
   };
 
-  const handleProtectConfirm = async () => {
-    const fd = new FormData();
-    fd.append("image_id", imageId);
-  
-    if (selectedItems.length > 0) {
-      selectedItems.forEach((item) => {
-        const idx = labels.indexOf(item);
-        if (idx !== -1) fd.append("selected_indices", String(idx));
-      });
-    }
-  
+  // 선택 완료 후 마스크 생성 → 인페인팅 → 채팅 화면으로 이동
+  const handleStartCleaning = async () => {
+    setLoading(true);
     try {
-      await fetch("http://localhost:8000/cleaning/removal", { method: "POST", body: fd });
-  
-      const { inpainted_url } = await fetch("http://localhost:8000/cleaning/inpaint", {
+      const form = new FormData();
+      form.append("image_id", passedImageId);
+      selectedIndices.forEach(i => form.append("selected_indices", i.toString()));
+
+      // 마스크 생성
+      await fetch("http://localhost:8000/cleaning/removal", {
         method: "POST",
-        body: new URLSearchParams({ image_id: imageId }),
-      }).then((r) => r.json());
-  
-      if (!inpainted_url) throw new Error();
-      navigate("/roomie/chat", {
-        state: { imageUrl: inpainted_url, title, blankRoomUrl: inpainted_url },
+        body: form,
       });
+
+      // 인페인팅
+      const respInpaint = await fetch("http://localhost:8000/cleaning/inpaint", {
+        method: "POST",
+        body: new URLSearchParams({ image_id: passedImageId }),
+      });
+      const { inpainted_url } = await respInpaint.json();
+      if (!inpainted_url) throw new Error();
+
+      // navigate
+      navigate("/roomie/chat", {
+        state: {
+          imageUrl: inpainted_url,
+          blankRoomUrl: inpainted_url,
+          imageId: passedImageId,
+          originalImageId,
+          title,
+          sessionId,
+          isClean: true,
+        },
+      });
+
     } catch {
-      setError("청소 과정에서 문제가 생겼어요.");
+      setError("청소 과정에서 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (error) return <div className="p-4 text-red-500">{error}</div>;
-  if (step === "analyzing") return <p className="p-4">방을 분석하고 있어요…</p>;
+  if (error) {
+    return <div className="p-4 text-red-500">{error}</div>;
+  }
 
   return (
     <div className="p-6 space-y-6">
-      {messages.map((msg, i) =>
-        msg.type === "text" ? (
-          <p key={i} className="bg-gray-100 p-3 rounded-xl w-fit max-w-md">{msg.text}</p>
-        ) : (
-          <img key={i} src={msg.src} className="w-full rounded-xl shadow" />
-        )
-      )}
+      <ChatMessageList messages={messages} />
 
       {step === "askClean" && (
         <div className="space-y-4">
-          {loading && <p className="text-center text-gray-500 animate-pulse">가구를 감지 중입니다… 🕵️</p>}
-          <div className="flex gap-4 justify-center">
-            <button onClick={() => handleAskClean(true)} className="px-6 py-3 bg-blue-600 text-white rounded-xl">
-              청소할래
-            </button>
-            <button onClick={() => handleAskClean(false)} className="px-6 py-3 bg-gray-300 rounded-xl">
-              이미 깨끗해
-            </button>
-          </div>
+          {loading
+            ? <p className="text-center text-gray-500 animate-pulse">가구를 감지 중입니다… 🕵️</p>
+            : (
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={() => handleAskClean(true)}
+                  disabled={loading}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-xl"
+                >
+                  청소할래
+                </button>
+                <button
+                  onClick={() => handleAskClean(false)}
+                  disabled={loading}
+                  className="px-6 py-3 bg-gray-300 rounded-xl"
+                >
+                  이미 깨끗해
+                </button>
+              </div>
+            )
+          }
         </div>
       )}
 
       {step === "labeling" && (
-        <>
-          <p className="font-semibold">감지된 물건 중 남길 항목을 선택해주세요:</p>
-          <div className="flex flex-wrap gap-2">
-            {labels.map((label, i) => (
+        <div>
+          <p className="font-semibold">남길 가구를 선택해주세요:</p>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {labels.map((label, idx) => (
               <button
-                key={i}
-                onClick={() => toggleItem(label)}
+                key={idx}
+                onClick={() => toggleLabel(idx)}
                 className={`px-4 py-2 rounded-xl border ${
-                  selectedItems.includes(label)
+                  selectedIndices.includes(idx)
                     ? "bg-blue-600 text-white"
                     : "bg-gray-200 text-gray-800"
                 }`}
@@ -187,14 +195,22 @@ export default function RoomieClean() {
             ))}
           </div>
 
-          <button
-            onClick={handleProtectConfirm}
-            className="mt-4 w-full py-3 bg-green-600 text-white rounded-xl"
-          >
-            청소 시작
-          </button>
-        </>
+          {loading ? (
+            <p className="mt-4 text-center text-gray-500 animate-pulse">
+              청소 중입니다… 🧹
+            </p>
+          ) : (
+            <button
+              onClick={handleStartCleaning}
+              disabled={loading}
+              className="mt-4 w-full py-3 bg-blue-600 text-white rounded-xl"
+            >
+              청소 시작
+            </button>
+          )}
+        </div>
       )}
+
     </div>
   );
 }
