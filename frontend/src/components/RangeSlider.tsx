@@ -38,15 +38,13 @@ export default function RangeSlider({
     return null
   }
 
+  const mid = Math.floor((min + max) / 2)
+
   return (
     <div className="space-y-2">
       {/* 라벨 및 값 범위 */}
       <div>
-        <p className="text-sm font-semibold">{label}</p>
-        <div className="flex justify-between text-xs text-gray-600 mt-1">
-          <span>{formatPrice(value[0])}</span>
-          <span>{formatPrice(value[1])}</span>
-        </div>
+        <p className="text-sm font-semibold mb-4">{label}</p>
       </div>
 
       {/* 슬라이더 */}
@@ -100,6 +98,13 @@ export default function RangeSlider({
           )
         }}
       />
+
+      {/* 중간값 라벨 추가 */}
+      <div className="relative h-5">
+        <span className="absolute left-0 text-xs text-gray-500">{formatPrice(min)}</span>
+        <span className="absolute left-1/2 -translate-x-1/2 text-xs text-gray-500">{formatPrice(mid)}</span>
+        <span className="absolute right-0 text-xs text-gray-500">{formatPrice(max)}</span>
+      </div>
     </div>
   )
 }
