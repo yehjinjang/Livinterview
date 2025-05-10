@@ -9,7 +9,7 @@ import torchvision
 import torchvision.transforms as TS
 from PIL import Image
 
-from empty_room_gen.masking.modules.loader import load_image, load_model_gdino
+from empty_room_gen.masking.modules.loader import load_model, load_image
 from empty_room_gen.masking.modules.predictor import get_grounding_output
 from empty_room_gen.masking.modules.utils import normalize, is_must_keep
 from empty_room_gen.recognize_anything.segment_anything import build_sam, SamPredictor
@@ -74,7 +74,7 @@ def _get_or_build_dino(config: str, ckpt: str, device: str):
     key = f"dino|{ckpt}|{device}"
     mdl = _ModelCache.get(key)
     if mdl is None:
-        mdl = load_model_gdino(config, ckpt, device)
+        mdl = load_model(config, ckpt, device)
         _ModelCache.add(key, mdl)
     return mdl
 
