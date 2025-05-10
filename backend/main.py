@@ -8,8 +8,9 @@ from routes.kakao import router as kakao_router
 from routes.naver import router as naver_router
 from routes.user import router as user_router
 from routes.chat import router as chat_router
+from routes.image_download import router as download_router
+from routes.structure_analyze import router as structure_router
 from routes.data import router as data_router
-from routes.vision_analyze import router as vision_router
 from routes.generate import router as generate_router
 from routes.cleaning import router as cleaning_router
 
@@ -42,11 +43,13 @@ app.include_router(naver_router, prefix="/auth/naver", tags=["Naver"])
 app.include_router(data_router, prefix="/data", tags=["Data"])
 app.include_router(user_router, tags=["User"])
 app.include_router(chat_router, tags=["Chat"])
-app.include_router(vision_router, prefix="/vision", tags=["VisionAnalyze"])
+app.include_router(download_router, prefix="/vision")
+app.include_router(structure_router, prefix="/vision")
 app.include_router(generate_router, tags=["Generate"])
 app.include_router(cleaning_router, prefix="/cleaning", tags=["Cleaning"])
 
 # 정적 파일 서빙 경로 추가
 app.mount("/static", StaticFiles(directory="data"), name="static")
+app.mount("/data", StaticFiles(directory="data"), name="data")
 
 # from routes.roomie import router as roomie_router
