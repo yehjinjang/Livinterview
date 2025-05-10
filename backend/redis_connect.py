@@ -1,8 +1,8 @@
 import redis
-from core.config import REDIS_HOST, REDIS_PORT, SESSION_EXPIRE_SECONDS
 
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+from core.config import REDIS_HOST, REDIS_PORT, SESSION_EXPIRE_SECONDS, REDIS_PASSWORD
 
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True, password=REDIS_PASSWORD)
 
 def serialize_dict(d: dict) -> dict:
     return {k: str(v) if isinstance(v, bool) else v for k, v in d.items()}
