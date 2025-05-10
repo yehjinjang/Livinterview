@@ -201,7 +201,7 @@ export default function RoomieChat() {
   };
 
   
-  const summarizeAndGenerateImage = async () => {
+  const summarize = async () => {
     if (isSending || isGenerating) return;
     setIsGenerating(true);
     try {
@@ -283,13 +283,13 @@ export default function RoomieChat() {
       const { image_url } = await fetch("http://localhost:8000/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, session_id: sessionId, }),
+        body: JSON.stringify({ prompt, session_id: sessionId, image_id: passedImageId,}),
       }).then((r) => r.json());
 
       localStorage.setItem("generatedImage", image_url);
       localStorage.setItem("originalImage", blankRoomUrl ?? imageUrl);
 
-      navigate("/roomie-result", {
+      navigate("/roomie/result", {
         state: {
           originalImage: blankRoomUrl ?? imageUrl,
           generatedImage: image_url,
@@ -303,12 +303,19 @@ export default function RoomieChat() {
 
   useEffect(() => {
     if (!messages.length && !typingText) return;
+
     const last = messages[messages.length - 1];
     if (last?.sender === "bot" && last.text?.includes("좋아! 이대로 방을 꾸며볼게")) {
-      generateImageAndNavigate(summaryText);
+      const run = async () => {
+        console.log("🚀 자동 생성 흐름 트리거");
+        await generateImageAndNavigate(summaryText);
+      };
+      run();
     }
+
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typingText]);
+
 
   if (isAnalyzing) {
   return <LoadingSpinner text="방을 불러오는 중이에요..." />;
@@ -328,7 +335,7 @@ export default function RoomieChat() {
           isSending={isSending || !!typingText}
           isGenerating={isGenerating}
           sendMessage={sendMessage}
-          summarizeAndGenerateImage={summarizeAndGenerateImage}
+          summarizeAndGenerateImage={summarize}
         />
       </div>
     );
