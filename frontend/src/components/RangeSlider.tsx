@@ -100,10 +100,10 @@ export default function RangeSlider({
       />
 
       {/* 중간값 라벨 추가 */}
-      <div className="relative h-5">
-        <span className="absolute left-0 text-xs text-gray-500">{formatPrice(min)}</span>
+      <div className="relative h-5 mt-5">
+        <span className="absolute left-0 text-xs text-gray-500">{formatPrice(value[0])}</span>
         <span className="absolute left-1/2 -translate-x-1/2 text-xs text-gray-500">{formatPrice(mid)}</span>
-        <span className="absolute right-0 text-xs text-gray-500">{formatPrice(max)}</span>
+        <span className="absolute right-0 text-xs text-gray-500">{formatPrice(value[1])}</span>
       </div>
     </div>
   )
