@@ -32,24 +32,30 @@ export default function RangeSlider({
   value,
   onChange,
 }: Props) {
-  const isValid = value.length === 2 && value[0] !== value[1] && value[0] >= min && value[1] <= max
+  const sortedMin = Math.max(min, Math.min(value[0], value[1]));
+  const sortedMax = Math.min(max, Math.max(value[0], value[1]));
+  const [minVal, maxVal]: [number, number] = [sortedMin, sortedMax];
 
-  if (!isValid) {
-    return null
-  }
+  // if (!isValid) {
+  //   return null
+  // }
 
+  // const [minVal, maxVal] = value[0] <= value[1] ? value : [value[1], value[0]]
   const mid = Math.floor((min + max) / 2)
 
   return (
     <div className="space-y-2">
       {/* 라벨 및 값 범위 */}
       <div>
-        <p className="text-sm font-semibold mb-4">{label}</p>
+        <p className="text-sm font-semibold mb-4 flex justify-between">
+          <span className="text-left">{label}</span>
+          <span className="text-[#433CFF]">{formatPrice(minVal)}~{formatPrice(maxVal)}</span>
+          </p>
       </div>
 
       {/* 슬라이더 */}
       <Range
-        values={value}
+        values={[minVal, maxVal]}
         step={step}
         min={min}
         max={max}
@@ -62,7 +68,7 @@ export default function RangeSlider({
               height: "6px",
               width: "100%",
               background: getTrackBackground({
-                values: value,
+                values: [minVal, maxVal],
                 colors: ["#ccc", "#433CFF", "#ccc"],
                 min,
                 max,
@@ -101,9 +107,9 @@ export default function RangeSlider({
 
       {/* 중간값 라벨 추가 */}
       <div className="relative h-5 mt-5">
-        <span className="absolute left-0 text-xs text-gray-500">{formatPrice(value[0])}</span>
+        <span className="absolute left-0 text-xs text-gray-500">{formatPrice(min)}</span>
         <span className="absolute left-1/2 -translate-x-1/2 text-xs text-gray-500">{formatPrice(mid)}</span>
-        <span className="absolute right-0 text-xs text-gray-500">{formatPrice(value[1])}</span>
+        <span className="absolute right-0 text-xs text-gray-500">{formatPrice(max)}</span>
       </div>
     </div>
   )
