@@ -1,6 +1,9 @@
 # routes/create_map.py
 import os
 import geopandas as gpd
+import matplotlib
+matplotlib.use("Agg")  #  GUI 백엔드 대신 파일 출력용 백엔드 사용
+
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import matplotlib as mpl
@@ -51,10 +54,18 @@ def create_map(full_location: str):
     # 시각화
     fig, ax = plt.subplots(figsize=(6, 6))
     gu_filtered.plot(ax=ax, color=gu_filtered['fill'], edgecolor='black', linewidth=1)
+
     for _, row in gu_filtered.iterrows():
-        c = row.geometry.centroid
-        ax.text(c.x, c.y, row['EMD_NM'], fontsize=9, fontweight='bold', ha='center', va='center',
-                bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", lw=0.5))
+        # 중심 좌표 대신 representative point 사용
+        c = row.geometry.representative_point()
+        ax.text(
+            c.x, c.y, row['EMD_NM'],
+            fontsize=9,
+            fontweight='bold',
+            ha='center',
+            va='center',
+            bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", lw=0.5)
+        )
 
     plt.axis('off')
     plt.tight_layout()

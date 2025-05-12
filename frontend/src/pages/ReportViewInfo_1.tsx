@@ -28,7 +28,7 @@ export default function ReportViewInfo_1({ dongName, fullLocation, userName, top
         style={{
           width: "794px",
           height: "1123px",
-          backgroundImage: "url('/icons/report/all_report_view/04_informaion_1.jpg')",
+          backgroundImage: "url('/icons/report/all_report_view/04_information_1.jpg')",
           backgroundSize: "100% 100%",
           backgroundPosition: "top left",
           boxShadow: "0 0 8px rgba(0,0,0,0.1)",
@@ -55,12 +55,10 @@ export default function ReportViewInfo_1({ dongName, fullLocation, userName, top
         <div
           style={{
             position: "absolute",
-            top: "100px",
-            right: "60px",
-            width: "220px",
-            height: "auto",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
+            top: "370px",     
+            left: "60px",     
+            width: "360px",   
+            height: "360px", 
             overflow: "hidden",
             backgroundColor: "white",
           }}
@@ -68,7 +66,7 @@ export default function ReportViewInfo_1({ dongName, fullLocation, userName, top
           <img
             src={`/icons/report/all_report_view/map_image/${dongName}_map.png`}
             alt={`${dongName} 위치 지도`}
-            style={{ width: "100%", height: "auto", display: "block" }}
+            style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
           />
         </div>
 

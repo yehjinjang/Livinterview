@@ -37,8 +37,8 @@ export default function ReportView() {
       운동: 50,
     };
 
-  const dongName = location.state?.dongName || "역촌동"; // 추천 동
-  const guName = location.state?.guName || "은평구"; 
+  const dongName = location.state?.dongName || "구의동"; // 추천 동
+  const guName = location.state?.guName || "광진구"; 
   const fullLocation = `서울특별시 ${guName} ${dongName}`;
 
   const reportRef = useRef<HTMLDivElement>(null);
@@ -71,8 +71,6 @@ export default function ReportView() {
   
     generateMap();
   }, [fullLocation]);
-  
-
 
 
 
