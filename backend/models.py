@@ -10,6 +10,7 @@ from sqlalchemy import (
     TEXT,
     Float,
     JSON,
+    BigInteger
 )
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func, expression
@@ -265,6 +266,8 @@ class SeoulRoom(Base):
     lng = Column(Float)
     floor = Column(String(20))
     area_m2 = Column(Float)
+    deposit = Column(BigInteger)
+    monthly = Column(Integer)
     maintenance_fee = Column(Integer)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
