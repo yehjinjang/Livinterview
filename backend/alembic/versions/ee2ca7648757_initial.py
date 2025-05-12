@@ -66,6 +66,8 @@ def upgrade() -> None:
     sa.Column('lng', sa.Float(), nullable=True),
     sa.Column('floor', sa.String(length=20), nullable=True),
     sa.Column('area_m2', sa.Float(), nullable=True),
+    sa.Column('deposit', sa.BigInteger(), nullable=True),
+    sa.Column('monthly', sa.Integer(), nullable=True),
     sa.Column('maintenance_fee', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id')

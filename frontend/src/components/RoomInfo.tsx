@@ -16,10 +16,10 @@ export default function RoomInfo({
     >
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-lg font-bold">{room.title}</h2>
-          <p className="text-sm text-gray-600">{room.address}</p>
+          <h2 className="text-lg font-bold">{room.room_title}</h2>
+          <p className="text-sm text-gray-600">{room.dong_name}</p>
           <p className="text-blue-600 font-semibold mt-1">
-            {room.price}만원 / {room.size}평
+            {room.price_type}/{room.price_info}만원 / {room.area_m2}평/{room.lat}/{room.lng}/{room.deposit}/{room.monthly}
           </p>
         </div>
         <button onClick={(e) => {

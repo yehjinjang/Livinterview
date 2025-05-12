@@ -71,6 +71,8 @@ def run_insert():
             lng=row["lng"],
             floor=row["floor"],
             area_m2=row["area_m2"],
+            deposit=row["deposit"],
+            monthly=row["monthly"],
             maintenance_fee=row["maintenance_fee"]
         )
         session.add(room)
@@ -80,7 +82,7 @@ def run_insert():
     session.close()
     print(f"✅ 총 {inserted_count}개 매물이 DB에 저장되었습니다. 🕒 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-def schedule_insert(hour="16", minute="10"):
+def schedule_insert(hour="16", minute="21"):
     schedule_time = f"{hour.zfill(2)}:{minute.zfill(2)}"
     print(f"⏰ 매일 {schedule_time}에 자동 저장 작업이 실행됩니다.")
     schedule.every().day.at(schedule_time).do(run_insert)
