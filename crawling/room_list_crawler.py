@@ -9,7 +9,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
-
 import sys
 from pathlib import Path
 # Livinterview 디렉토리를 sys.path에 추가
@@ -18,13 +17,11 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from backend.models import SeoulRoom
 
 load_dotenv()
-
 DATABASE_URL = os.getenv("DB_URL")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 
-
-# ───── 기본 설정 (유지) ─────
+# ───── 기본 설정 ─────
 PAGE_SIZE   = 50
 MAX_PAGES   = 20
 ZOOM        = 13
@@ -63,7 +60,7 @@ KEEP_COLS = [
     "priceTitle", "randomLocation", "imgUrlList"
 ]
 
-# ───── roomDesc 파싱 함수 ─────
+# ───── roomDesc 파싱 ─────
 def parse_room_desc(desc):
     floor, area, fee = None, None, 0
     if isinstance(desc, str):
@@ -82,42 +79,49 @@ def parse_room_desc(desc):
                 fee = float(re.sub(r"[^\d.]", "", fee_raw) or 0)
     return pd.Series([floor, area, int(fee)])
 
+# ───── 가격 정보 파싱 ─────
+def parse_price_info(row):
+    price_type = row.get('priceTypeName', '')
+    price_info = row.get('priceTitle', '')
+    deposit, monthly = 0, 0
 
-# ───── 수동 매핑 함수 ─────
-def df_to_seoulroom_records(df):
-    # NaN 값을 None으로 변환 (MySQL 저장 오류 방지)
-    df = df.replace({pd.NA: None, pd.NaT: None, float('nan'): None})
+    if isinstance(price_info, str):
+        if price_type == "월세":
+            deposit_monthly = re.match(r"(\d*\.?\d+)/(\d*\.?\d+)", price_info)
+            if deposit_monthly:
+                deposit = int(parse_money(deposit_monthly.group(1))) or 0
+                monthly = int(parse_money(deposit_monthly.group(2))) or 0
+        elif price_type == "전세":
+            deposit = parse_money(price_info)
+            monthly = 0
+    return pd.Series([deposit, monthly])
 
-    mapped_records = []
-    for _, row in df.iterrows():
-        record = {
-            "dong_code": str(row.get("dong_code") or "").strip(),
-            "gu_name": str(row.get("gu_name") or "").strip(),
-            "dong_name": str(row.get("dong_name") or "").strip(),
-            "seq": int(row.get("seq") or 0),
-            "room_type": str(row.get("roomTypeName") or "").strip(),
-            "room_title": str(row.get("roomTitle") or "").strip(),
-            "room_desc": str(row.get("roomDesc") or "").strip(),
-            "price_type": str(row.get("priceTypeName") or "").strip(),
-            "price_info": str(row.get("priceTitle") or "").strip(),
-            "img_url_list": json.dumps(row.get("imgUrlList") or []),
-            "lat": row.get("lat") if pd.notna(row.get("lat")) else None,
-            "lng": row.get("lng") if pd.notna(row.get("lng")) else None,
-            "floor": str(row.get("floor") or "").strip(),
-            "area_m2": row.get("area_m2") if pd.notna(row.get("area_m2")) else None,
-            "maintenance_fee": int(row.get("maintenance_fee") or 0),
-        }
-        mapped_records.append(record)
-    return mapped_records
+# ───── 금액 문자열 → 숫자 ─────
+def parse_money(money_str):
+    money = 0
+    parts = re.findall(r"(\d*\.?\d+)\s*(억|만|천)?", money_str.strip())
 
+    for num, unit in parts:
+        num = float(num)
+        if unit == "억":
+            money += num * 1e8
+        elif unit == "만":
+            money += num * 1e4
+        elif unit == "천":
+            money += num * 1e3
+        else:
+            money += num * 1e4  # 단위 없으면 만원 단위
+    return int(money) if money > 0 else None
 
-# ───── 메인 크롤링 함수 (DataFrame 반환용) ─────
+# ───── 크롤링 ─────
 def crawl_all_dongs():
+
     """
     서울시 법정동 코드 리스트를 바탕으로
     다방 API에서 원룸/투룸 매물 데이터를 크롤링한 뒤,
     전처리된 pandas DataFrame을 반환합니다.
     """
+
     session = SessionLocal()
     dong_df = pd.read_sql("SELECT * FROM Seoul_dong_codes", session.bind)
     dong_df["code"] = dong_df["code"].astype(str)
@@ -191,9 +195,9 @@ def crawl_all_dongs():
     if all_rows:
         df = pd.DataFrame(all_rows)
         df[["floor", "area_m2", "maintenance_fee"]] = df["roomDesc"].apply(parse_room_desc)
-        df = df[["dong_code", "gu_name", "dong_name"] + KEEP_COLS + ["lat", "lng", "floor", "area_m2", "maintenance_fee"]]
+        df[["deposit", "monthly"]] = df.apply(parse_price_info, axis=1)
+        df = df[["dong_code", "gu_name", "dong_name"] + KEEP_COLS + ["lat", "lng", "floor", "area_m2", "deposit", "monthly", "maintenance_fee"]]
         return df
     else:
         print("⛔ 저장할 데이터가 없습니다.")
         return pd.DataFrame()
-
