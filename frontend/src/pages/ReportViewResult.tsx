@@ -1,24 +1,14 @@
 import { useLocation } from "react-router-dom";
 
-export default function ReportViewResult() {
-  // 🔐 로그인한 사용자 이름 불러오기
-  const storedUser = sessionStorage.getItem("user");
-  const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-  const userName = parsedUser?.name || "이름 없음";
+// 타입 정의
+type ReportViewResultProps = {
+  userName: string;
+  topIndicators: string[];
+  scores: Record<string, number>;
+};
 
-  // 📊 리포트 데이터 (설문 결과 기반)
-  const location = useLocation();
-  const topIndicators = location.state?.topIndicators || ["생활", "안전", "교통"];
-  const scores = location.state?.scores || {
-    교통: 60,
-    편의: 60,
-    안전: 70,
-    건강: 20,
-    녹지: 45,
-    생활: 70,
-    놀이: 25,
-    운동: 50,
-  };
+
+export default function ReportViewResult({ userName, topIndicators, scores }: ReportViewResultProps) {
 
   const indicatorDescription: Record<string, string> = {
     교통: "지역권역의 위치, 거주의 위치를 실내공간으로 중요하게 생각하는 편임",
@@ -70,25 +60,12 @@ export default function ReportViewResult() {
             fontFamily: "Pretendard-Regular"
           }}
         >
-          <span style={{
-            fontWeight: "bold",
-            color: "black"
-          }}>
-            {userName}
-          </span>
-          <span>님은 거주지를 선택하실 때,</span>
+           <span style={{ fontWeight: "bold", color: "black" }}>{userName}</span> <span>님은 거주지를 선택하실 때,</span>
           {topIndicators.map((indicator: string, idx: number) => (
-            <span key={idx} style={{
-              fontWeight: "bold",
-              color: "black"
-            }}>
-              {indicator}
-            </span>
+            <span key={idx} style={{ fontWeight: "bold", color: "black" }}>{indicator}</span>
           ))}
           <span>부분을 중요하게 생각하시네요.</span>
         </div>
-
-        
 
         {/* 🖼️ 중요 지표 아이콘 이미지 3개 */}
         <div
@@ -169,8 +146,7 @@ export default function ReportViewResult() {
           ))}
         </div>
 
-
-        {/* 📊 하단 지표 결과 */} 
+        {/* 📊 하단 점수표 */}
         <div style={{ position: "absolute", top: "745px", left: "29px", fontFamily: "Pretendard-Regular", fontSize: "13px", width: "720px", maxHeight: "380px", overflow: "hidden",  boxSizing: "border-box" }}>
           <div style={{ backgroundColor: "#4c8689", color: "white", padding: "5px 12px", fontSize: "15px", lineHeight: "1.6", whiteSpace: "nowrap", width: "251px" }}>
             <span style={{ fontWeight: "bold", fontSize: "18px" }}>{userName}</span> 님의 8가지 지표 분석
