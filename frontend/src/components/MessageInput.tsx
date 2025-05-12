@@ -35,7 +35,7 @@ export default function MessageInput({
           className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-2 rounded-full text-sm"
           disabled={isGenerating}
         >
-          {isGenerating ? "생성 중..." : "인테리어 생성"}
+          {isGenerating ? "요약 중..." : "인테리어 생성"}
         </button>
       </div>
     )

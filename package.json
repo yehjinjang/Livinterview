@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "html2pdf.js": "^0.10.3"
+    "axios": "^1.9.0",
+    "swiper": "^11.2.6"
+
   }
 }

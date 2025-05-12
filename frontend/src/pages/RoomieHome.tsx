@@ -12,7 +12,10 @@ export default function RoomieHome() {
 
   return (
     <div className="flex flex-col w-full h-screen relative">
-      <FilterCard onFilterChange={(filters) => console.log("필터 변경됨", filters)} />
+      {/* 필터 카드 영역 (RoomDetail이 열려 있을 땐 숨김) */}
+      {!showDetail && (
+        <FilterCard onFilterChange={(filters) => console.log("필터 변경됨", filters)} />
+      )}
 
       {/* 지도 영역  */}
       <div className="flex-1">

@@ -2,9 +2,12 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from core.config import KAKAO_REST_API_KEY, KAKAO_SECRET
 import httpx, logging
+from redis_connect import create_session
+import uuid
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
 
 @router.get("")
 async def login_kakao(request: Request):
@@ -16,6 +19,7 @@ async def login_kakao(request: Request):
     print("🔗 Kakao login URL:", login_url)
     return RedirectResponse(login_url)
 
+
 @router.get("/callback")
 async def auth_kakao_callback(request: Request):
     # print("---- Kakao 콜백 호출됨----- ")
@@ -23,7 +27,7 @@ async def auth_kakao_callback(request: Request):
         code = request.query_params.get("code")
         print("Code:", code)
         redirect_uri = "http://localhost:8000/auth/kakao/callback"
-        
+
         async with httpx.AsyncClient() as client:
             token_res = await client.post(
                 "https://kauth.kakao.com/oauth/token",
@@ -33,8 +37,8 @@ async def auth_kakao_callback(request: Request):
                     "client_id": KAKAO_REST_API_KEY,
                     "redirect_uri": redirect_uri,
                     "code": code,
-                    "client_secret": KAKAO_SECRET
-                }
+                    "client_secret": KAKAO_SECRET,
+                },
             )
             token = token_res.json()
             access_token = token["access_token"]
@@ -42,13 +46,22 @@ async def auth_kakao_callback(request: Request):
 
             user_res = await client.get(
                 "https://kapi.kakao.com/v2/user/me",
-                headers={"Authorization": f"Bearer {access_token}"}
+                headers={"Authorization": f"Bearer {access_token}"},
             )
             user = user_res.json()
+            account = user["kakao_account"]
+            email = account.get("email")
+            name = account.get("profile", {}).get("nickname")
+            user = {
+                "email": email,
+                "name": name,
+            }
             # print("Kakao 사용자 정보:", user)
-            request.session['user'] = user
-
-            return RedirectResponse("http://localhost:5173/roomie")
+            session_id = str(uuid.uuid4())
+            create_session(session_id, user)
+            response = RedirectResponse("http://localhost:5173/roomie")
+            response.set_cookie("session_id", session_id, httponly=True)
+            return response
 
     except Exception as e:
         logger.error(f"Kakao Login Error: {e}")
