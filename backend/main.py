@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from core.config import SESSION_SECRET_KEY
+from core.config import SESSION_SECRET_KEY , DB_URL
 from routes.google import router as google_router
 from routes.kakao import router as kakao_router
 from routes.naver import router as naver_router
@@ -43,3 +43,6 @@ app.include_router(generate_router, tags=["Generate"])
 #app.include_router(roomie_router, prefix="/api",tags=["Roomie"])
 app.include_router(map_router, tags=["Map"])
 
+# 로드된 DB URL 로그 출력 (마스킹 처리 포함)
+safe_db_url = DB_URL.replace(DB_URL.split(":")[2].split("@")[0], "****")
+print(f" DB 연결 확인: {safe_db_url}")
