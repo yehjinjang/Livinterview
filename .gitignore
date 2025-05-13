@@ -2,12 +2,13 @@ env/
 .env
 venv/
 .venv/
+lama-venv/
 
 
 .DS_Store
 
-models/
-data/
+# models/
+# data/
 node_modules/
 dist/
 *.tsbuildinfo
@@ -16,3 +17,41 @@ node_modules/.tmp/
 
 __pycache__/
 *.sqlite3
+
+
+# Python bytecode
+**/__pycache__/
+**/*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments (추가 경로)
+ENV/
+backend/empty-room-gen/inpaint/lama-venv/
+
+# Logs
+*.log
+
+# Model checkpoints
+*.pth
+*.pt
+**/*.ckpt
+backend/empty-room-gen/masking/checkpoints/
+
+# Masking output
+backend/empty-room-gen/masking/outputs/
+
+# Sample/demo images
+backend/empty-room-gen/masking/Tag2Text/images/
+**/demo_outputs/
+**/test_images/
+**/inference_outputs/
+
+# Tensorboard / lightning logs
+lightning_logs/
+tb_logs/
+outputs/
+__pycache__/
+*.pyc

@@ -10,29 +10,52 @@ interface Props {
   onChange: (val: [number, number]) => void
 }
 
+// 금액 포맷팅 
+function formatPrice(val: number) {
+  if (val >= 10000) {
+    const 억 = Math.floor(val / 10000)
+    const 천 = val % 10000
+    if (천 === 0) {
+      return `${억}억`
+    } else {
+      return `${억}억 ${천}만`
+    }
+  }
+  return `${val}만`
+}
+
 export default function RangeSlider({
   label,
   min,
   max,
   step,
-  unit,
   value,
   onChange,
 }: Props) {
+  const sortedMin = Math.max(min, Math.min(value[0], value[1]));
+  const sortedMax = Math.min(max, Math.max(value[0], value[1]));
+  const [minVal, maxVal]: [number, number] = [sortedMin, sortedMax];
+
+  // if (!isValid) {
+  //   return null
+  // }
+
+  // const [minVal, maxVal] = value[0] <= value[1] ? value : [value[1], value[0]]
+  const mid = Math.floor((min + max) / 2)
+
   return (
     <div className="space-y-2">
       {/* 라벨 및 값 범위 */}
       <div>
-        <p className="text-sm font-semibold">{label}</p>
-        <div className="flex justify-between text-xs text-gray-600 mt-1">
-          <span>{value[0]}{unit}</span>
-          <span>{value[1]}{unit}</span>
-        </div>
+        <p className="text-sm font-semibold mb-4 flex justify-between">
+          <span className="text-left">{label}</span>
+          <span className="text-[#433CFF]">{formatPrice(minVal)}~{formatPrice(maxVal)}</span>
+          </p>
       </div>
 
       {/* 슬라이더 */}
       <Range
-        values={value}
+        values={[minVal, maxVal]}
         step={step}
         min={min}
         max={max}
@@ -45,7 +68,7 @@ export default function RangeSlider({
               height: "6px",
               width: "100%",
               background: getTrackBackground({
-                values: value,
+                values: [minVal, maxVal],
                 colors: ["#ccc", "#433CFF", "#ccc"],
                 min,
                 max,
@@ -81,6 +104,13 @@ export default function RangeSlider({
           )
         }}
       />
+
+      {/* 중간값 라벨 추가 */}
+      <div className="relative h-5 mt-5">
+        <span className="absolute left-0 text-xs text-gray-500">{formatPrice(min)}</span>
+        <span className="absolute left-1/2 -translate-x-1/2 text-xs text-gray-500">{formatPrice(mid)}</span>
+        <span className="absolute right-0 text-xs text-gray-500">{formatPrice(max)}</span>
+      </div>
     </div>
   )
 }

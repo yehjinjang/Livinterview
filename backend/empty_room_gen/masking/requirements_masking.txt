@@ -1,0 +1,17 @@
+# Core dependencies
+torch>=1.13.0
+torchvision>=0.14.0
+numpy
+opencv-python
+Pillow
+
+# GroundingDINO
+git+https://github.com/IDEA-Research/GroundingDINO.git
+
+# Segment Anything
+git+https://github.com/facebookresearch/segment-anything.git
+
+# Tag2Text (used locally, not pip-installable)
+transformers
+timm
+scipy

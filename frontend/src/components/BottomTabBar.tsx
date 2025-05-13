@@ -6,9 +6,9 @@ export default function BottomTabBar() {
   const currentPath = location.pathname
 
   return (
-    <footer className="w-full bg-white border-t border-gray-200 py-3 flex justify-around items-center shadow-inner">
-      <Link to="/">
-        <div className={`flex flex-col items-center transition ${currentPath === "/" ? "text-zipup-600 font-semibold" : "text-gray-500 hover:text-zipup-600"}`}>
+  <footer className="fixed bottom-0 left-0 w-full bg-white border-t py-3 flex justify-around items-center shadow-inner z-50">
+      <Link to="/home">
+        <div className={`flex flex-col items-center transition ${currentPath === "/home" ? "text-zipup-600 font-semibold" : "text-gray-500 hover:text-zipup-600"}`}>
           <Home size={24} />
           <span className="text-xs mt-1">Homie</span>
         </div>
