@@ -38,6 +38,8 @@ transformers==4.51.3
 huggingface-hub==0.30.2
 safetensors==0.5.3
 groundingdino-py
+git+https://github.com/facebookresearch/segment-anything.git
+fairscale==0.4.13
 
 # ────────── 데이터 · 보조 유틸 ──────────
 requests==2.32.3
