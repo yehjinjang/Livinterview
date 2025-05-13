@@ -26,7 +26,7 @@ def create_map(full_location: str):
     mpl.rcParams['axes.unicode_minus'] = False
 
     # SHP 불러오기
-    shp_path = r"C:/Users/user/Desktop/Livinterview/data/LSMD_ADM_SECT_UMD_서울/LSMD_ADM_SECT_UMD_11_202504.shp"
+    shp_path = r"C:\Users\user\Desktop\Livinterview\frontend\public\LSMD_ADM_SECT_UMD_서울\LSMD_ADM_SECT_UMD_11_202504.shp"
     gdf = gpd.read_file(shp_path, encoding='euc-kr').to_crs(epsg=4326)
 
     # 자치구 코드 매핑
