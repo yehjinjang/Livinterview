@@ -59,7 +59,3 @@ app.include_router(cleaning_router, prefix="/cleaning", tags=["Cleaning"])
 # 정적 파일 서빙
 app.mount("/static", StaticFiles(directory="data"), name="static")
 app.mount("/data", StaticFiles(directory="data"), name="data")
-
-# DB URL 마스킹 출력
-safe_db_url = DB_URL.replace(DB_URL.split(":")[2].split("@")[0], "****")
-print(f"🟢 DB 연결 확인: {safe_db_url}")

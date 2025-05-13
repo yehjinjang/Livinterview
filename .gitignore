@@ -53,3 +53,5 @@ backend/empty-room-gen/masking/Tag2Text/images/
 lightning_logs/
 tb_logs/
 outputs/
+__pycache__/
+*.pyc
