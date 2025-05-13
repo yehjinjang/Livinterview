@@ -64,7 +64,7 @@ export default function ReportViewInfo_1({ dongName, fullLocation, userName, top
           }}
         >
           <img
-            src={`/icons/report/all_report_view/map_image/${dongName}_map.png`}
+            src={`/icons/report/all_report_view/map_image/${encodeURIComponent(dongName)}_map.png`}
             alt={`${dongName} 위치 지도`}
             style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
           />
