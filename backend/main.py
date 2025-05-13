@@ -59,3 +59,4 @@ app.include_router(cleaning_router, prefix="/cleaning", tags=["Cleaning"])
 # 정적 파일 서빙
 app.mount("/static", StaticFiles(directory="data"), name="static")
 app.mount("/data", StaticFiles(directory="data"), name="data")
+
