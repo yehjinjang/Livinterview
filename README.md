@@ -16,7 +16,7 @@ ZIPUP은 사용자의 라이프스타일에 맞춘 맞춤형 LLM 레포트를 �
 
 
 
-##Preview
+## Preview
 
 
 
@@ -24,4 +24,5 @@ ZIPUP은 사용자의 라이프스타일에 맞춘 맞춤형 LLM 레포트를 �
 https://github.com/user-attachments/assets/fcf37d66-4ed3-4727-b120-1216262b2ab2
 
 https://github.com/user-attachments/assets/d1c5f05e-6f68-462c-8b55-b2357a15f9d0
+
 
